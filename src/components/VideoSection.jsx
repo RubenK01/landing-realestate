@@ -9,7 +9,7 @@ const VideoSection = () => {
         autoPlay
         loop
       >
-        <source src="/video.mp4" type="video/mp4" />
+        <source src="/Video.mp4" type="video/mp4" />
         Tu navegador no soporta el elemento de video.
       </video>
     </div>
