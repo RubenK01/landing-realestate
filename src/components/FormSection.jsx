@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 const barriosMadrid = [
   'Centro', 'Arganzuela', 'Retiro', 'Salamanca', 'Chamartín', 'Tetuán', 'Chamberí',
@@ -7,7 +7,7 @@ const barriosMadrid = [
   'Villa de Vallecas', 'Vicálvaro', 'San Blas-Canillejas', 'Barajas'
 ];
 
-const FormSection = () => {
+const FormSection = ({ onHeightChange }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -16,6 +16,13 @@ const FormSection = () => {
     barrio: ''    // Barrio de Madrid
   });
   const [accepted, setAccepted] = useState(false);
+  const formRef = useRef(null);
+
+  useEffect(() => {
+    if (formRef.current && onHeightChange) {
+      onHeightChange(formRef.current.offsetHeight);
+    }
+  }, [onHeightChange, formData, accepted]);
 
   const handleChange = (e) => {
     setFormData({
@@ -59,7 +66,7 @@ const FormSection = () => {
 
   return (
     <div className="w-full h-full flex items-center justify-center">
-      <div className="rounded-lg p-6 w-full max-w-lg">
+      <div className="rounded-lg p-6 w-full max-w-lg" ref={formRef}>
         <h3 className="text-lg md:text-2xl text-white mb-4 text-left leading-tight">
           <span className="font-extrabold">Vende</span> o <span className="font-extrabold">Alquila</span> tu propiedad en Madrid rápido, y sin perder valor con un método profesional <span className="font-extrabold">VERIFICADO</span>
         </h3>

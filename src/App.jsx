@@ -5,9 +5,6 @@ import CookieConsent, { Cookies } from 'react-cookie-consent';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
 
-// IDs ficticios para reemplazar fácilmente
-const GA_ID = 'TU_GA_ID';
-const PIXEL_ID = 'TU_PIXEL_ID';
 
 // Página de política de cookies
 function PoliticaCookies() {
@@ -58,6 +55,8 @@ function PoliticaPrivacidad() {
 function App() {
   // Estado para saber si el usuario ha aceptado cookies
   const [cookiesAccepted, setCookiesAccepted] = useState(false);
+  // Estado para la altura del formulario
+  const [formHeight, setFormHeight] = useState(null);
 
   useEffect(() => {
     // Leer la cookie de consentimiento
@@ -141,11 +140,11 @@ function App() {
               <div className="w-full max-w-[920px] flex flex-col lg:flex-row mx-auto my-auto">
                 {/* Video Section - 50% width on large screens, full width on mobile */}
                 <div className="w-full lg:w-1/2 flex items-center justify-center p-4">
-                  <VideoSection />
+                  <VideoSection maxHeight={formHeight ? formHeight + 'px' : undefined} />
                 </div>
                 {/* Form Section - 50% width on large screens, full width on mobile */}
                 <div className="w-full lg:w-1/2 flex items-center justify-center p-4">
-                  <FormSection />
+                  <FormSection onHeightChange={setFormHeight} />
                 </div>
               </div>
             }
