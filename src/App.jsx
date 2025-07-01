@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import VideoSection from './components/VideoSection';
 import FormSection from './components/FormSection';
 import CookieConsent, { Cookies } from 'react-cookie-consent';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
 
 // IDs ficticios para reemplazar fácilmente
@@ -11,30 +11,46 @@ const PIXEL_ID = 'TU_PIXEL_ID';
 
 // Página de política de cookies
 function PoliticaCookies() {
+  const navigate = useNavigate();
   return (
     <div className="h-screen bg-black text-white flex flex-col items-center justify-center p-6">
       <h1 className="text-2xl font-bold mb-4">Política de Cookies</h1>
       <p className="max-w-xl text-justify text-gray-200 mb-2">
         Utilizamos cookies propias y de terceros para analizar el uso de la web y mostrarte publicidad personalizada. Puedes aceptar o rechazar las cookies en cualquier momento. Para más información, consulta esta política.
       </p>
-      <p className="max-w-xl text-justify text-gray-400 text-sm">
+      <p className="max-w-xl text-justify text-gray-400 text-sm mb-6">
         Las cookies son pequeños archivos que se almacenan en tu dispositivo para mejorar tu experiencia de navegación. Puedes configurar tu navegador para bloquearlas, pero algunas funcionalidades pueden verse afectadas.
       </p>
+      <button
+        onClick={() => navigate('/')}
+        className="mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded shadow transition"
+        aria-label="Cerrar y volver a la página principal"
+      >
+        Volver a la página principal
+      </button>
     </div>
   );
 }
 
 // Página de política de privacidad
 function PoliticaPrivacidad() {
+  const navigate = useNavigate();
   return (
     <div className="h-screen bg-black text-white flex flex-col items-center justify-center p-6">
       <h1 className="text-2xl font-bold mb-4">Política de Privacidad</h1>
       <p className="max-w-xl text-justify text-gray-200 mb-2">
         Tus datos personales serán tratados de forma confidencial y solo se utilizarán para gestionar tu solicitud y enviarte información relacionada. No compartimos tus datos con terceros sin tu consentimiento.
       </p>
-      <p className="max-w-xl text-justify text-gray-400 text-sm">
+      <p className="max-w-xl text-justify text-gray-400 text-sm mb-6">
         Puedes ejercer tus derechos de acceso, rectificación y supresión enviando un email a nuestro contacto. Para más detalles, consulta esta política.
       </p>
+      <button
+        onClick={() => navigate('/')}
+        className="mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded shadow transition"
+        aria-label="Cerrar y volver a la página principal"
+      >
+        Volver a la página principal
+      </button>
     </div>
   );
 }
@@ -75,35 +91,42 @@ function App() {
         })(window,document,'script','dataLayer','GTM-WHZN597J');`;
       document.head.appendChild(gtmScript);
 
-      // Facebook Pixel
-      const fbScript = document.createElement('script');
-      fbScript.innerHTML = `!function(f,b,e,v,n,t,s)
-      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-      n.queue=[];t=b.createElement(e);t.async=!0;
-      t.src=v;s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s)}(window,document,'script',
-      'https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', '1274266927426416'); 
-      fbq('track', 'PageView');`;
-      document.head.appendChild(fbScript);
-
-      // Facebook Domain Verification meta
-      const fbMeta = document.createElement('meta');
-      fbMeta.setAttribute('name', 'facebook-domain-verification');
-      fbMeta.setAttribute('content', '8is5bwhcw6flaidmo7p1ygieye0fa9');
-      document.head.appendChild(fbMeta);
+      // Facebook Pixel (patrón robusto para React/Vite)
+      if (!window.fbq) {
+        // Define fbq
+        window.fbq = function () {
+          window.fbq.callMethod
+            ? window.fbq.callMethod.apply(window.fbq, arguments)
+            : window.fbq.queue.push(arguments);
+        };
+        window.fbq.queue = [];
+        window.fbq.loaded = true;
+        window.fbq.version = '2.0';
+        // Carga el script externo
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://connect.facebook.net/en_US/fbevents.js';
+        script.onload = () => {
+          window.fbq('init', '1274266927426416');
+          window.fbq('track', 'PageView');
+        };
+        document.head.appendChild(script);
+      } else {
+        // Si ya existe, solo trackea PageView
+        window.fbq('track', 'PageView');
+      }
+      // Añadir el <noscript> solo una vez
+      if (!document.getElementById('fb-pixel-noscript')) {
+        const fbNoscript = document.createElement('noscript');
+        fbNoscript.id = 'fb-pixel-noscript';
+        fbNoscript.innerHTML = `<img height="1" width="1" src="https://www.facebook.com/tr?id=1274266927426416&ev=PageView&noscript=1"/>`;
+        document.body.prepend(fbNoscript);
+      }
 
       // Google Tag Manager noscript (body)
       const gtmNoscript = document.createElement('noscript');
-      gtmNoscript.innerHTML = `<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WHZN597J" height="0" width="0" style="display:none;visibility:hidden"></iframe>`;
+      gtmNoscript.innerHTML = `<iframe src=\"https://www.googletagmanager.com/ns.html?id=GTM-WHZN597J\" height=\"0\" width=\"0\" style=\"display:none;visibility:hidden\"></iframe>`;
       document.body.prepend(gtmNoscript);
-
-      // Facebook Pixel noscript (body)
-      const fbNoscript = document.createElement('noscript');
-      fbNoscript.innerHTML = `<img height="1" width="1" src="https://www.facebook.com/tr?id=1274266927426416&ev=PageView&noscript=1"/>`;
-      document.body.prepend(fbNoscript);
     }
   }, [cookiesAccepted]);
 
