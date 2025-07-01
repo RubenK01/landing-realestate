@@ -154,6 +154,25 @@ const FormSection = () => {
               Acepto recibir comunicaciones comerciales.
             </label>
           </div>
+          <p className="mt-1 text-[11px] text-gray-400 text-left">
+            Consulta nuestra{' '}
+            <a
+              href="/politica-privacidad"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-400 hover:text-blue-600"
+            >
+              política de privacidad
+            </a>{' '}y{' '}
+            <a
+              href="/politica-cookies"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-400 hover:text-blue-600"
+            >
+              política de cookies
+            </a>.
+          </p>
 
           <button
             type="submit"
