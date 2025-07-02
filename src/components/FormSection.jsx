@@ -1,10 +1,24 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const barriosMadrid = [
-  'Centro', 'Arganzuela', 'Retiro', 'Salamanca', 'Chamartín', 'Tetuán', 'Chamberí',
-  'Fuencarral-El Pardo', 'Moncloa-Aravaca', 'Latina', 'Carabanchel', 'Usera',
-  'Puente de Vallecas', 'Moratalaz', 'Ciudad Lineal', 'Hortaleza', 'Villaverde',
-  'Villa de Vallecas', 'Vicálvaro', 'San Blas-Canillejas', 'Barajas'
+const zonasMadrid = [
+  {
+    label: 'Madrid Capital',
+    options: [
+      'Centro', 'Arganzuela', 'Retiro', 'Salamanca', 'Chamartín', 'Tetuán', 'Chamberí',
+      'Fuencarral-El Pardo', 'Moncloa-Aravaca', 'Latina', 'Carabanchel', 'Usera',
+      'Puente de Vallecas', 'Moratalaz', 'Ciudad Lineal', 'Hortaleza', 'Villaverde',
+      'Villa de Vallecas', 'Vicálvaro', 'San Blas-Canillejas', 'Barajas'
+    ].sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }))
+  },
+  {
+    label: 'Municipios de Madrid',
+    options: [
+      'Alcobendas', 'San Sebastián de los Reyes', 'Tres Cantos', 'Colmenar Viejo', 'Getafe',
+      'Leganés', 'Fuenlabrada', 'Parla', 'Pinto', 'Coslada', 'San Fernando de Henares',
+      'Torrejón de Ardoz', 'Rivas-Vaciamadrid', 'Alcorcón', 'Móstoles', 'Pozuelo de Alarcón',
+      'Majadahonda', 'Las Rozas de Madrid', 'Boadilla del Monte'
+    ].sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }))
+  }
 ];
 
 const FormSection = ({ onHeightChange }) => {
@@ -17,12 +31,67 @@ const FormSection = ({ onHeightChange }) => {
   });
   const [accepted, setAccepted] = useState(false);
   const formRef = useRef(null);
+  const [zonaInput, setZonaInput] = useState('');
+  const [zonaDropdownOpen, setZonaDropdownOpen] = useState(false);
+  const [zonaFiltered, setZonaFiltered] = useState(zonasMadrid);
+  const zonaInputRef = useRef(null);
+  const [clientIp, setClientIp] = useState('');
+
+  // Sanitiza y limita la entrada
+  const sanitizeZona = (value) => {
+    // Permite letras, números, espacios, tildes y guiones
+    return value.replace(/[^\p{L}\p{N} \-áéíóúÁÉÍÓÚüÜñÑ]/gu, '').slice(0, 40);
+  };
+
+  useEffect(() => {
+    if (zonaInput === '') {
+      setZonaFiltered(zonasMadrid);
+    } else {
+      const lower = zonaInput.toLowerCase();
+      setZonaFiltered(
+        zonasMadrid
+          .map(grupo => ({
+            ...grupo,
+            options: grupo.options.filter(zona => zona.toLowerCase().includes(lower))
+          }))
+          .filter(grupo => grupo.options.length > 0)
+      );
+    }
+  }, [zonaInput]);
+
+  // Cuando selecciona una zona del dropdown
+  const handleZonaSelect = (zona) => {
+    setFormData({ ...formData, barrio: zona });
+    setZonaInput(zona);
+    setZonaDropdownOpen(false);
+  };
+
+  // Cuando escribe en el input
+  const handleZonaInput = (e) => {
+    const value = sanitizeZona(e.target.value);
+    setZonaInput(value);
+    setFormData({ ...formData, barrio: value });
+    setZonaDropdownOpen(true);
+  };
+
+  // Cierra el dropdown al perder foco
+  const handleZonaBlur = () => {
+    setTimeout(() => setZonaDropdownOpen(false), 120);
+  };
 
   useEffect(() => {
     if (formRef.current && onHeightChange) {
       onHeightChange(formRef.current.offsetHeight);
     }
   }, [onHeightChange, formData, accepted]);
+
+  useEffect(() => {
+    // Obtener IP pública al cargar el componente
+    fetch('https://api.ipify.org?format=json')
+      .then(res => res.json())
+      .then(data => setClientIp(data.ip))
+      .catch(() => setClientIp(''));
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -35,6 +104,14 @@ const FormSection = ({ onHeightChange }) => {
     setAccepted(e.target.checked);
   };
 
+  // Obtiene fbp y fbc de cookies si existen
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return undefined;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!accepted) {
@@ -42,21 +119,56 @@ const FormSection = ({ onHeightChange }) => {
       return;
     }
     try {
+      // Envío principal (backend propio)
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      const response = await fetch(`${apiUrl}/submit-form`, {
+      fetch(`${apiUrl}/submit-form`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData)
-      });
+      })
+        .then(response => {
+          if (response.ok) {
+            alert('Formulario enviado exitosamente!');
+            setFormData({ name: '', email: '', phone: '', operation: '', barrio: '' });
+            setZonaInput('');
+            setAccepted(false);
+          } else {
+            alert('Error al enviar el formulario');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error de conexión');
+        });
 
-      if (response.ok) {
-        alert('Formulario enviado exitosamente!');
-        setFormData({ name: '', email: '', phone: '', operation: '', barrio: '' });
-        setAccepted(false);
-      } else {
-        alert('Error al enviar el formulario');
+      // Envío a API Gateway de Conversiones (independiente)
+      if (accepted) {
+        const conversionPayload = {
+          email: formData.email,
+          nombre: formData.name,
+          operacion: formData.operation,
+          zona: formData.barrio,
+          telefono: formData.phone || undefined,
+          fbp: getCookie('_fbp'),
+          fbc: getCookie('_fbc'),
+          event_source_url: window.location.href,
+          client_ip_address: clientIp,
+          client_user_agent: navigator.userAgent
+        };
+        console.log('[CONVERSIONS] Enviando payload:', conversionPayload);
+        fetch('https://jvg8q372n4.execute-api.eu-central-1.amazonaws.com/prod/conversions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(conversionPayload)
+        })
+          .then(res => res.json().then(data => {
+            console.log('[CONVERSIONS] Respuesta:', data);
+          }))
+          .catch(err => {
+            console.error('[CONVERSIONS] Error:', err);
+          });
       }
     } catch (error) {
       console.error('Error:', error);
@@ -87,26 +199,47 @@ const FormSection = ({ onHeightChange }) => {
               required
               className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-800 text-white text-xs md:text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="" disabled>Operación (alquiler o venta)</option>
-              <option value="Alquiler">Alquiler</option>
-              <option value="Compra">Compra</option>
+              <option value="" disabled>Selecciona tu operación</option>
+              <option value="Alquiler">Vender mi inmueble</option>
+              <option value="Compra">Alquilar mi inmueble</option>
             </select>
           </div>
 
-          <div>
-            <select
+          <div className="relative">
+            <input
+              type="text"
               id="barrio"
               name="barrio"
-              value={formData.barrio}
-              onChange={handleChange}
+              autoComplete="off"
+              value={zonaInput}
+              onChange={handleZonaInput}
+              onFocus={() => setZonaDropdownOpen(true)}
+              onBlur={handleZonaBlur}
+              maxLength={40}
               required
+              ref={zonaInputRef}
               className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-800 text-white text-xs md:text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="" disabled>Zona (barrios de Madrid)</option>
-              {barriosMadrid.map((barrio) => (
-                <option key={barrio} value={barrio}>{barrio}</option>
-              ))}
-            </select>
+              placeholder="Zona (Madrid y alrededores)"
+            />
+            {zonaDropdownOpen && zonaFiltered.length > 0 && (
+              <div className="absolute z-10 mt-1 w-full bg-gray-900 border border-gray-700 rounded-md shadow-lg max-h-48 overflow-auto left-0 text-left">
+                {zonaFiltered.map(grupo => (
+                  <div key={grupo.label}>
+                    <div className="px-3 py-1 text-xs text-gray-400 font-semibold select-none">{grupo.label}</div>
+                    {[...grupo.options].sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' })).map(zona => (
+                      <div
+                        key={zona}
+                        className="px-3 py-2 cursor-pointer hover:bg-blue-600 hover:text-white text-xs text-gray-200"
+                        onMouseDown={() => handleZonaSelect(zona)}
+                      >
+                        {zona}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="text-right text-[10px] text-gray-400 mt-1">Máx. 40 caracteres</div>
           </div>
 
           <div>
@@ -140,11 +273,10 @@ const FormSection = ({ onHeightChange }) => {
               type="tel"
               id="phone"
               name="phone"
-              required
               value={formData.phone}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-800 text-white text-xs md:text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Teléfono"
+              placeholder="Teléfono (opcional)"
             />
           </div>
 
