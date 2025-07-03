@@ -27,7 +27,7 @@ const FormSection = ({ onHeightChange }) => {
     email: '',
     phone: '',
     operation: '', // Alquiler o Compra
-    barrio: ''    // Barrio de Madrid
+    zone: ''    // Barrio de Madrid
   });
   const [accepted, setAccepted] = useState(false);
   const formRef = useRef(null);
@@ -119,9 +119,7 @@ const FormSection = ({ onHeightChange }) => {
       return;
     }
     try {
-      // Envío principal (backend propio)
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      fetch(`${apiUrl}/submit-form`, {
+      fetch(`https://api.metodovende.es/prod/submit-form`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -130,27 +128,27 @@ const FormSection = ({ onHeightChange }) => {
       })
         .then(response => {
           if (response.ok) {
-            alert('Formulario enviado exitosamente!');
-            setFormData({ name: '', email: '', phone: '', operation: '', barrio: '' });
+            // alert('Formulario enviado exitosamente!');
+            setFormData({ name: '', email: '', phone: '', operation: '', zone: '' });
             setZonaInput('');
             setAccepted(false);
           } else {
-            alert('Error al enviar el formulario');
+            // alert('Error al enviar el formulario');
           }
         })
         .catch(error => {
           console.error('Error:', error);
-          alert('Error de conexión');
+          // alert('Error de conexión');
         });
 
       // Envío a API Gateway de Conversiones (independiente)
       if (accepted) {
         const conversionPayload = {
           email: formData.email,
-          nombre: formData.name,
-          operacion: formData.operation,
-          zona: formData.barrio,
-          telefono: formData.phone || undefined,
+          name: formData.name,
+          operation: formData.operation,
+          zone: formData.barrio,
+          phone: formData.phone || undefined,
           fbp: getCookie('_fbp'),
           fbc: getCookie('_fbc'),
           event_source_url: window.location.href,
