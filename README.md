@@ -4,17 +4,17 @@ Una landing page moderna y profesional para el sector inmobiliario, construida c
 
 ## 📋 Tabla de Contenidos
 
-- [Características](#características)
-- [Arquitectura del Proyecto](#arquitectura-del-proyecto)
-- [Tecnologías](#tecnologías)
-- [Instalación](#instalación)
-- [Desarrollo](#desarrollo)
-- [Despliegue](#despliegue)
-- [Estructura del Proyecto](#estructura-del-proyecto)
-- [Configuración](#configuración)
-- [Buenas Prácticas](#buenas-prácticas)
-- [Contribución](#contribución)
-- [Licencia](#licencia)
+- [Características](#-características)
+- [Arquitectura del Proyecto](#-arquitectura-del-proyecto)
+- [Tecnologías](#-tecnologías)
+- [Instalación](#-instalación)
+- [Desarrollo](#-desarrollo)
+- [Despliegue](#-despliegue)
+- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [Configuración](#-configuración)
+- [Buenas Prácticas](#-buenas-prácticas)
+- [Contribución](#-contribución)
+- [Licencia](#-licencia)
 
 ## ✨ Características
 
