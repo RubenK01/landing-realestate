@@ -32,8 +32,10 @@ const CookieBanner = ({ onAccept, onDecline }) => {
   };
 
   // No mostrar en páginas de políticas
-  const currentPath = window.location.pathname;
-  const isPolicyPage = currentPath === '/politica-privacidad' || currentPath === '/politica-cookies';
+  const currentPath = window.location.pathname.toLowerCase().replace(/\/$/, '');
+  const isPolicyPage =
+    currentPath.startsWith('/politica-privacidad') ||
+    currentPath.startsWith('/politica-cookies');
   
   if (isPolicyPage || !showBanner) {
     return null;

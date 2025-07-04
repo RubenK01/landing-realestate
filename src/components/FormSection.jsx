@@ -183,7 +183,7 @@ const FormSection = ({ onHeightChange }) => {
 
   return (
     <div className="w-full h-full flex items-center justify-center">
-      <div className="rounded-lg p-6 w-full max-w-lg" ref={formRef}>
+      <div className="rounded-lg p-6 pb-8 w-full max-w-lg" ref={formRef}>
         <h3 className="text-lg md:text-2xl text-white mb-4 text-left leading-tight">
           <span className="font-extrabold">Vende</span> o <span className="font-extrabold">Alquila</span> tu propiedad en Madrid rápido, y sin perder valor con un método profesional <span className="font-extrabold">VERIFICADO</span>
         </h3>
@@ -314,9 +314,9 @@ const FormSection = ({ onHeightChange }) => {
           >
             Enviar Mensaje
           </button>
-          <p className="mt-2 text-xs text-gray-400 text-left">
-            ¿Quieres saber más sobre el <span className="text-yellow-400">Método V.E.N.D.E.</span> o sobre mi?{' '}
-            <a href="/metodo-inmobiliario" className="text-blue-400 underline hover:text-blue-600 transition-colors">Click aquí</a>
+          <p className="mt-1 w-full text-[10px] md:text-xs text-gray-400 text-left leading-tight break-words whitespace-normal">
+            ¿Quieres saber más sobre el <span className="text-yellow-400">Método V.E.N.D.E.</span> o sobre mí?
+            <a href="/metodo-inmobiliario" className="block w-full text-blue-400 underline hover:text-blue-600 transition-colors mt-1">Click aquí</a>
           </p>
         </form>
       </div>
