@@ -298,7 +298,6 @@ const FormSection = ({ onHeightChange }) => {
               He leído y acepto la{' '}
               <a
                 href="/politica-privacidad"
-                target="_blank"
                 rel="noopener noreferrer"
                 className="underline text-blue-400 hover:text-blue-600"
                 onClick={(e) => e.stopPropagation()}
