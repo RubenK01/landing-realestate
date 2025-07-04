@@ -61,7 +61,7 @@ const PoliticaPrivacidad = () => {
             </h2>
             <div className="space-y-2">
               <p>
-                <span className="font-semibold">● Datos facilitados en el formulario de contacto:</span> nombre, email, mensaje.
+                <span className="font-semibold">● Datos facilitados en el formulario de contacto:</span> operación, zona, nombre, email, teléfono.
               </p>
               <p>
                 <span className="font-semibold">● Datos recogidos mediante cookies</span> (Google Analytics, Meta Pixel) para analizar el uso de la web y mejorar nuestros servicios.
