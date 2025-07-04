@@ -135,7 +135,7 @@ const FormSection = ({ onHeightChange }) => {
             setZonaInput('');
             setAccepted(false);
             // Redirigir a la página de agradecimiento
-            navigate('/gracias');
+            navigate('/thank-you');
           } else {
             // alert('Error al enviar el formulario');
           }
@@ -145,8 +145,9 @@ const FormSection = ({ onHeightChange }) => {
           // alert('Error de conexión');
         });
 
-      // Envío a API Gateway de Conversiones (independiente)
-      if (accepted) {
+      // Envío a API Gateway de Conversiones (solo si acepta cookies)
+      const consentCookies = getCookie('consentCookies');
+      if (accepted && consentCookies === 'true') {
         const conversionPayload = {
           email: formData.email,
           name: formData.name,
@@ -171,6 +172,8 @@ const FormSection = ({ onHeightChange }) => {
           .catch(err => {
             console.error('[CONVERSIONS] Error:', err);
           });
+      } else if (accepted && consentCookies !== 'true') {
+        console.log('[CONVERSIONS] No se envían datos a Meta - Usuario no ha aceptado cookies');
       }
     } catch (error) {
       console.error('Error:', error);
@@ -185,7 +188,7 @@ const FormSection = ({ onHeightChange }) => {
           <span className="font-extrabold">Vende</span> o <span className="font-extrabold">Alquila</span> tu propiedad en Madrid rápido, y sin perder valor con un método profesional <span className="font-extrabold">VERIFICADO</span>
         </h3>
         <p className="text-gray-300 mb-3 text-left text-xs md:text-sm leading-tight text-justify">
-          Vende o alquila tu propiedad en Madrid en menos de 45 días, al mejor precio y con gestión 100% profesional, gracias al Método <span className="font-semibold">V.E.N.D.E.®</span>: visibilidad total, estrategia precisa y control absoluto de todo el proceso.
+          Vende o alquila tu propiedad en Madrid en menos de 45 días, al mejor precio y con gestión 100% profesional, gracias al <span className="font-semibold text-yellow-400">Método V.E.N.D.E.®</span>: visibilidad total, estrategia precisa y control absoluto de todo el proceso.
         </p>
         <h2 className="text-lg md:text-xl font-bold text-white mb-4 text-left">
           Contáctanos
@@ -313,8 +316,8 @@ const FormSection = ({ onHeightChange }) => {
             Enviar Mensaje
           </button>
           <p className="mt-2 text-xs text-gray-400 text-left">
-            ¿Quieres saber más sobre el Método V.E.N.D.E. o sobre mi?{' '}
-            <a href="https://metodoinmobiliario.ju.mp/" className="text-blue-400 underline hover:text-blue-600 transition-colors">Click aquí</a>
+            ¿Quieres saber más sobre el <span className="text-yellow-400">Método V.E.N.D.E.</span> o sobre mi?{' '}
+            <a href="/metodo-inmobiliario" className="text-blue-400 underline hover:text-blue-600 transition-colors">Click aquí</a>
           </p>
         </form>
       </div>
