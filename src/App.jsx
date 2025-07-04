@@ -11,6 +11,7 @@ import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 
 // Components
 import CookieBanner from './components/CookieBanner';
+import Footer from './components/Footer';
 
 // Hooks
 import { useAnalytics } from './hooks/useAnalytics';
@@ -58,6 +59,7 @@ function App() {
         onAccept={() => setCookiesAccepted(true)}
         onDecline={() => setCookiesAccepted(false)}
       />
+      <Footer />
     </div>
   );
 }
