@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import VideoSection from './components/VideoSection';
 import FormSection from './components/FormSection';
+import ThankYouSection from './components/ThankYouSection';
 import CookieConsent, { Cookies } from 'react-cookie-consent';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
@@ -151,6 +152,7 @@ function App() {
           />
           <Route path="/politica-cookies" element={<PoliticaCookies />} />
           <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
+          <Route path="/thank-you" element={<ThankYouSection />} />
         </Routes>
       </div>
       {/* Banner de cookies siempre fixed abajo */}

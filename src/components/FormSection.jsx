@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const zonasMadrid = [
   {
@@ -22,6 +23,7 @@ const zonasMadrid = [
 ];
 
 const FormSection = ({ onHeightChange }) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -132,6 +134,8 @@ const FormSection = ({ onHeightChange }) => {
             setFormData({ name: '', email: '', phone: '', operation: '', zone: '' });
             setZonaInput('');
             setAccepted(false);
+            // Redirigir a la página de agradecimiento
+            navigate('/gracias');
           } else {
             // alert('Error al enviar el formulario');
           }
@@ -278,7 +282,7 @@ const FormSection = ({ onHeightChange }) => {
             />
           </div>
 
-          <div className="flex items-start">
+          <div className="flex items-start justify-start">
             <input
               type="checkbox"
               id="accept"
@@ -287,29 +291,20 @@ const FormSection = ({ onHeightChange }) => {
               className="mt-1 mr-2 accent-blue-600"
               required
             />
-            <label htmlFor="accept" className="text-xs text-gray-400 select-none cursor-pointer">
-              Acepto recibir comunicaciones comerciales.
+            <label htmlFor="accept" className="text-xs text-gray-400 select-none cursor-pointer text-left">
+              He leído y acepto la{' '}
+              <a
+                href="/politica-privacidad"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline text-blue-400 hover:text-blue-600"
+                onClick={(e) => e.stopPropagation()}
+              >
+                política de privacidad
+              </a>{' '}
+              y acepto recibir comunicaciones comerciales.
             </label>
           </div>
-          <p className="mt-1 text-[11px] text-gray-400 text-left">
-            Consulta nuestra{' '}
-            <a
-              href="/politica-privacidad"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline text-blue-400 hover:text-blue-600"
-            >
-              política de privacidad
-            </a>{' '}y{' '}
-            <a
-              href="/politica-cookies"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline text-blue-400 hover:text-blue-600"
-            >
-              política de cookies
-            </a>.
-          </p>
 
           <button
             type="submit"
@@ -319,7 +314,7 @@ const FormSection = ({ onHeightChange }) => {
           </button>
           <p className="mt-2 text-xs text-gray-400 text-left">
             ¿Quieres saber más sobre el Método V.E.N.D.E. o sobre mi?{' '}
-            <a href="#" className="text-blue-400 underline hover:text-blue-600 transition-colors">Click aquí</a>
+            <a href="https://metodoinmobiliario.ju.mp/" className="text-blue-400 underline hover:text-blue-600 transition-colors">Click aquí</a>
           </p>
         </form>
       </div>
