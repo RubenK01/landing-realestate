@@ -63,8 +63,6 @@ const CookieBanner = ({ onAccept, onDecline }) => {
             Consulta nuestra{' '}
             <a
               href="/politica-cookies"
-              target="_blank"
-              rel="noopener noreferrer"
               className="text-blue-400 hover:text-blue-300 underline"
             >
               política de cookies
@@ -72,8 +70,6 @@ const CookieBanner = ({ onAccept, onDecline }) => {
             {' '}y nuestra{' '}
             <a
               href="/politica-privacidad"
-              target="_blank"
-              rel="noopener noreferrer"
               className="text-blue-400 hover:text-blue-300 underline"
             >
               política de privacidad
