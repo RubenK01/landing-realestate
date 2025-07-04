@@ -10,11 +10,10 @@ const CookieBanner = ({ onAccept, onDecline }) => {
     // Verificar si ya existe la cookie de consentimiento
     const consent = Cookies.get('consentCookies');
     
-    // No mostrar el banner en páginas de políticas
-    const isPolicyPage = location.pathname === '/politica-privacidad' || location.pathname === '/politica-cookies';
-    
-    if (!consent && !isPolicyPage) {
+    if (!consent) {
       setShowBanner(true);
+    } else {
+      setShowBanner(false);
     }
   }, [location.pathname]);
 
@@ -32,7 +31,11 @@ const CookieBanner = ({ onAccept, onDecline }) => {
     onDecline();
   };
 
-  if (!showBanner) {
+  // No mostrar en páginas de políticas
+  const currentPath = window.location.pathname;
+  const isPolicyPage = currentPath === '/politica-privacidad' || currentPath === '/politica-cookies';
+  
+  if (isPolicyPage || !showBanner) {
     return null;
   }
 
