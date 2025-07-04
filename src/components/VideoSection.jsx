@@ -54,6 +54,7 @@ const VideoSection = ({ maxHeight }) => {
           ref={videoRef}
           className="rounded-lg"
           style={mediaStyle}
+          preload="auto"
           controls
           autoPlay
           loop

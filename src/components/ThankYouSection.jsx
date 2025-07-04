@@ -14,6 +14,7 @@ const ThankYouSection = () => {
           <video
             className="w-full max-w-lg mx-auto rounded-lg shadow-lg"
             controls
+            preload="auto"
             autoPlay
             loop
           >
