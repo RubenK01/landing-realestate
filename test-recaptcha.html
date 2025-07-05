@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test reCAPTCHA</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+    <h1>Test reCAPTCHA</h1>
+    
+    <form>
+        <div class="g-recaptcha" 
+             data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+             data-callback="onRecaptchaSuccess"></div>
+        
+        <button type="submit">Enviar</button>
+    </form>
+
+    <script>
+        function onRecaptchaSuccess(token) {
+            console.log('reCAPTCHA success! Token:', token);
+            alert('reCAPTCHA completado! Token: ' + token);
+        }
+    </script>
+</body>
+</html> 

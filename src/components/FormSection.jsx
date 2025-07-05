@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { RECAPTCHA_SITE_KEY } from '../config/recaptcha';
 
 const zonasMadrid = [
   {
@@ -33,6 +34,8 @@ const FormSection = ({ onHeightChange }) => {
   });
   const [accepted, setAccepted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState('');
+  const [recaptchaError, setRecaptchaError] = useState('');
   const formRef = useRef(null);
   const [zonaInput, setZonaInput] = useState('');
   const [zonaDropdownOpen, setZonaDropdownOpen] = useState(false);
@@ -107,6 +110,26 @@ const FormSection = ({ onHeightChange }) => {
     setAccepted(e.target.checked);
   };
 
+  // Callback de reCAPTCHA
+  const onRecaptchaChange = (token) => {
+    setRecaptchaToken(token);
+    setRecaptchaError('');
+  };
+
+  // Hacer la función disponible globalmente para reCAPTCHA
+  useEffect(() => {
+    // Función global para reCAPTCHA
+    window.onRecaptchaChange = (token) => {
+      console.log('reCAPTCHA token received:', token);
+      setRecaptchaToken(token);
+      setRecaptchaError('');
+    };
+    
+    return () => {
+      delete window.onRecaptchaChange;
+    };
+  }, []);
+
   // Obtiene fbp y fbc de cookies si existen
   const getCookie = (name) => {
     const value = `; ${document.cookie}`;
@@ -121,16 +144,29 @@ const FormSection = ({ onHeightChange }) => {
       alert('Debes aceptar recibir comunicaciones comerciales y la política de privacidad.');
       return;
     }
+
+    if (!recaptchaToken) {
+      setRecaptchaError('Por favor, completa el reCAPTCHA para continuar.');
+      return;
+    }
     
     setIsSubmitting(true);
+    setRecaptchaError('');
     
     try {
+      // Agregar el token de reCAPTCHA y consentimiento al payload
+      const formDataWithRecaptcha = {
+        ...formData,
+        recaptchaToken: recaptchaToken,
+        consentCookies: getCookie('consentCookies') || 'false'
+      };
+
       fetch(`https://api.metodovende.es/prod/submit-form`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formDataWithRecaptcha)
       })
         .then(response => {
           if (response.ok) {
@@ -138,17 +174,32 @@ const FormSection = ({ onHeightChange }) => {
             setFormData({ name: '', email: '', phone: '', operation: '', zone: '' });
             setZonaInput('');
             setAccepted(false);
+            setRecaptchaToken('');
+            // Resetear reCAPTCHA
+            if (window.grecaptcha) {
+              window.grecaptcha.reset();
+            }
             // Redirigir a la página de agradecimiento
             navigate('/thank-you');
           } else {
             // alert('Error al enviar el formulario');
             setIsSubmitting(false);
+            // Resetear reCAPTCHA en caso de error
+            if (window.grecaptcha) {
+              window.grecaptcha.reset();
+            }
+            setRecaptchaToken('');
           }
         })
         .catch(error => {
           console.error('Error:', error);
           // alert('Error de conexión');
           setIsSubmitting(false);
+          // Resetear reCAPTCHA en caso de error
+          if (window.grecaptcha) {
+            window.grecaptcha.reset();
+          }
+          setRecaptchaToken('');
         });
 
       // Envío a API Gateway de Conversiones (solo si acepta cookies)
@@ -185,6 +236,11 @@ const FormSection = ({ onHeightChange }) => {
       console.error('Error:', error);
       alert('Error de conexión');
       setIsSubmitting(false);
+      // Resetear reCAPTCHA en caso de error
+      if (window.grecaptcha) {
+        window.grecaptcha.reset();
+      }
+      setRecaptchaToken('');
     }
   };
 
@@ -314,6 +370,24 @@ const FormSection = ({ onHeightChange }) => {
               y acepto recibir comunicaciones comerciales.
             </label>
           </div>
+
+          {/* reCAPTCHA */}
+          <div className="flex justify-center">
+            <div 
+              className="g-recaptcha" 
+              data-sitekey={RECAPTCHA_SITE_KEY}
+              data-callback="onRecaptchaChange"
+            ></div>
+            <div className="text-xs text-gray-400 mt-2 text-center">
+              {process.env.NODE_ENV === 'development' ? 'Usando reCAPTCHA de prueba para desarrollo' : 'Verificación de seguridad'}
+            </div>
+          </div>
+          
+          {recaptchaError && (
+            <div className="text-red-400 text-xs text-center">
+              {recaptchaError}
+            </div>
+          )}
 
           <button
             type="submit"
