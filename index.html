@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="facebook-domain-verification" content="8is5bwhcw6flaidmo7p1ygieye0fa9" />
     <title>Metodo V.E.N.D.E.®</title>
+    <link rel="stylesheet" href="/src/recaptcha-styles.css">
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://metodovende.es/" />
@@ -21,8 +22,11 @@
     
     <!-- reCAPTCHA v3 -->
     <script src="https://www.google.com/recaptcha/api.js?render=6LcvpngrAAAAANqmo28MvQayGcfjEatSBT7C_ziL"></script>
+    
+    <!-- Texto personalizado de reCAPTCHA -->
+    <div class="recaptcha-text">Este sitio está protegido por reCAPTCHA y se aplican la <a href="https://policies.google.com/privacy" target="_blank" style="color: #999;">Política de Privacidad</a> y los <a href="https://policies.google.com/terms" target="_blank" style="color: #999;">Términos de Servicio</a> de Google.</div>
   </head>
-  <body>
+  <body class="recaptcha-left">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

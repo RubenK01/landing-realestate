@@ -66,8 +66,8 @@ const FormSection = ({ onHeightChange }) => {
   }, [zonaInput]);
 
   // Cuando selecciona una zona del dropdown
-  const handleZonaSelect = (zona) => {
-    setFormData({ ...formData, barrio: zona });
+  const handleZonaSelect = (zone) => {
+    setFormData({ ...formData, zone: zone });
     setZonaInput(zona);
     setZonaDropdownOpen(false);
   };
@@ -76,7 +76,7 @@ const FormSection = ({ onHeightChange }) => {
   const handleZonaInput = (e) => {
     const value = sanitizeZona(e.target.value);
     setZonaInput(value);
-    setFormData({ ...formData, barrio: value });
+    setFormData({ ...formData, zone: value });
     setZonaDropdownOpen(true);
   };
 
@@ -359,7 +359,7 @@ const FormSection = ({ onHeightChange }) => {
 
           {/* reCAPTCHA v3 - Invisible */}
           <div className="text-xs text-gray-400 text-center">
-            {process.env.NODE_ENV === 'development' ? 'Usando reCAPTCHA v3 de prueba para desarrollo' : 'Verificación de seguridad invisible'}
+            {process.env.NODE_ENV === 'development' ? 'Usando reCAPTCHA v3 de prueba para desarrollo' : ''}
           </div>
           
           {recaptchaError && (

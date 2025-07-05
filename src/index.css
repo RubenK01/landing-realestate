@@ -6,3 +6,33 @@ html, body {
   background: #000 !important;
   min-height: 100vh;
 }
+
+/* Personalización del badge de reCAPTCHA v3 */
+.grecaptcha-badge {
+  left: 0 !important;
+  right: auto !important;
+  bottom: 0 !important;
+  top: auto !important;
+  position: fixed !important;
+  z-index: 9999 !important;
+}
+
+/* Alternativa: Ocultar badge y mostrar texto personalizado */
+.grecaptcha-badge {
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Texto personalizado de reCAPTCHA */
+.recaptcha-text {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  z-index: 9999;
+  font-size: 10px;
+  color: #666;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: Arial, sans-serif;
+}
