@@ -99,6 +99,14 @@ const FormSection = ({ onHeightChange }) => {
       .catch(() => setClientIp(''));
   }, []);
 
+  // Obtiene fbp y fbc de cookies si existen
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return undefined;
+  };
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -131,14 +139,6 @@ const FormSection = ({ onHeightChange }) => {
     }
   };
 
-  // Obtiene fbp y fbc de cookies si existen
-  const getCookie = (name) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-    return undefined;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!accepted) {
@@ -156,11 +156,16 @@ const FormSection = ({ onHeightChange }) => {
     setRecaptchaError('');
     
     try {
-      // Agregar el token de reCAPTCHA v3 y consentimiento al payload
+      // Agregar el token de reCAPTCHA v3 y toda la info necesaria al payload
       const formDataWithRecaptcha = {
         ...formData,
         recaptchaToken: token,
-        consentCookies: getCookie('consentCookies') || 'false'
+        consentCookies: getCookie('consentCookies') || 'false',
+        client_ip_address: clientIp,
+        fbp: getCookie('_fbp'),
+        fbc: getCookie('_fbc'),
+        event_source_url: window.location.href,
+        client_user_agent: navigator.userAgent
       };
 
       fetch(`https://api.metodovende.es/prod/submit-form`, {
@@ -191,37 +196,6 @@ const FormSection = ({ onHeightChange }) => {
           setIsSubmitting(false);
           setRecaptchaToken('');
         });
-
-      // Envío a API Gateway de Conversiones (solo si acepta cookies)
-      const consentCookies = getCookie('consentCookies');
-      if (accepted && consentCookies === 'true') {
-        const conversionPayload = {
-          email: formData.email,
-          name: formData.name,
-          operation: formData.operation,
-          zone: formData.zone,
-          phone: formData.phone || undefined,
-          fbp: getCookie('_fbp'),
-          fbc: getCookie('_fbc'),
-          event_source_url: window.location.href,
-          client_ip_address: clientIp,
-          client_user_agent: navigator.userAgent
-        };
-        console.log('[CONVERSIONS] Enviando payload:', conversionPayload);
-        fetch('https://api.metodovende.es/prod/conversions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(conversionPayload)
-        })
-          .then(res => res.json().then(data => {
-            console.log('[CONVERSIONS] Respuesta:', data);
-          }))
-          .catch(err => {
-            console.error('[CONVERSIONS] Error:', err);
-          });
-      } else if (accepted && consentCookies !== 'true') {
-        console.log('[CONVERSIONS] No se envían datos a Meta - Usuario no ha aceptado cookies');
-      }
     } catch (error) {
       console.error('Error:', error);
       alert('Error de conexión');

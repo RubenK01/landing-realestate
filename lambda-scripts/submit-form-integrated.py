@@ -82,6 +82,68 @@ def is_valid_email(email: str) -> bool:
     """Valida formato de email."""
     return re.match(r"[^@]+@[^@]+\.[^@]+", email) is not None
 
+def generate_recaptcha_report(recaptcha_result: dict) -> dict:
+    """
+    Genera un reporte detallado de la evaluación de reCAPTCHA
+    """
+    score = recaptcha_result.get('score', 0.0)
+    action = recaptcha_result.get('action', '')
+    hostname = recaptcha_result.get('hostname', '')
+    
+    # Evaluación del score
+    if score >= 0.9:
+        score_category = "EXCELLENT"
+        score_description = "Very likely human"
+        score_emoji = "🔵"
+    elif score >= 0.7:
+        score_category = "GOOD"
+        score_description = "Likely human"
+        score_emoji = "🟢"
+    elif score >= 0.5:
+        score_category = "MEDIUM"
+        score_description = "Possibly human"
+        score_emoji = "🟡"
+    elif score >= 0.3:
+        score_category = "LOW"
+        score_description = "Possibly bot"
+        score_emoji = "🟠"
+    else:
+        score_category = "VERY_LOW"
+        score_description = "Very likely bot"
+        score_emoji = "🔴"
+    
+    # Evaluación de la acción
+    action_correct = action == 'submit'
+    action_emoji = "✅" if action_correct else "⚠️"
+    
+    # Evaluación del hostname
+    hostname_correct = hostname == 'metodovende.es'
+    hostname_emoji = "✅" if hostname_correct else "⚠️"
+    
+    return {
+        'score': {
+            'value': score,
+            'category': score_category,
+            'description': score_description,
+            'emoji': score_emoji
+        },
+        'action': {
+            'value': action,
+            'expected': 'submit',
+            'correct': action_correct,
+            'emoji': action_emoji
+        },
+        'hostname': {
+            'value': hostname,
+            'expected': 'metodovende.es',
+            'correct': hostname_correct,
+            'emoji': hostname_emoji
+        },
+        'timestamp': recaptcha_result.get('challenge_ts', ''),
+        'raw_success': recaptcha_result.get('raw_success', False),
+        'error_codes': recaptcha_result.get('error_codes', [])
+    }
+
 def send_to_mailchimp(form_data: dict) -> dict:
     """
     Envía datos a Mailchimp
@@ -266,13 +328,57 @@ def lambda_handler(event, context):
                 })
             }
         
-        # ===== VALIDACIÓN DE reCAPTCHA =====
-        logger.info("Validating reCAPTCHA...")
+        # ===== VALIDACIÓN Y EVALUACIÓN DE reCAPTCHA =====
+        logger.info("Validating and evaluating reCAPTCHA...")
         recaptcha_result = verify_recaptcha(
             form_data['recaptchaToken'],
             environment='production'  # Cambiar según el entorno
         )
         
+        # ===== EVALUACIÓN DETALLADA DE reCAPTCHA =====
+        logger.info("=== reCAPTCHA EVALUATION DETAILS ===")
+        logger.info(f"Raw success: {recaptcha_result.get('raw_success', False)}")
+        logger.info(f"Score: {recaptcha_result.get('score', 0.0)}")
+        logger.info(f"Action: {recaptcha_result.get('action', 'N/A')}")
+        logger.info(f"Hostname: {recaptcha_result.get('hostname', 'N/A')}")
+        logger.info(f"Challenge timestamp: {recaptcha_result.get('challenge_ts', 'N/A')}")
+        logger.info(f"Error codes: {recaptcha_result.get('error_codes', [])}")
+        
+        # Evaluación del score
+        score = recaptcha_result.get('score', 0.0)
+        if score >= 0.9:
+            logger.info("🔵 reCAPTCHA Score: EXCELLENT (≥0.9) - Very likely human")
+        elif score >= 0.7:
+            logger.info("🟢 reCAPTCHA Score: GOOD (0.7-0.9) - Likely human")
+        elif score >= 0.5:
+            logger.info("🟡 reCAPTCHA Score: MEDIUM (0.5-0.7) - Possibly human")
+        elif score >= 0.3:
+            logger.info("🟠 reCAPTCHA Score: LOW (0.3-0.5) - Possibly bot")
+        else:
+            logger.info("🔴 reCAPTCHA Score: VERY LOW (<0.3) - Very likely bot")
+        
+        # Evaluación de la acción
+        action = recaptcha_result.get('action', '')
+        if action == 'submit':
+            logger.info("✅ Action: CORRECT ('submit')")
+        else:
+            logger.warning(f"⚠️ Action: UNEXPECTED ('{action}') - Expected 'submit'")
+        
+        # Evaluación del hostname
+        hostname = recaptcha_result.get('hostname', '')
+        expected_hostname = 'metodovende.es'
+        if hostname == expected_hostname:
+            logger.info(f"✅ Hostname: CORRECT ('{hostname}')")
+        else:
+            logger.warning(f"⚠️ Hostname: MISMATCH ('{hostname}') - Expected '{expected_hostname}'")
+        
+        logger.info("=== END reCAPTCHA EVALUATION ===")
+        
+        # Generar reporte detallado
+        recaptcha_report = generate_recaptcha_report(recaptcha_result)
+        logger.info(f"reCAPTCHA Report: {json.dumps(recaptcha_report, indent=2)}")
+        
+        # Validación básica (mantener la lógica actual)
         if not recaptcha_result['success']:
             logger.warning(f"reCAPTCHA validation failed: {recaptcha_result.get('error_codes', [])}")
             return {
@@ -337,7 +443,8 @@ def lambda_handler(event, context):
             },
             'body': json.dumps({
                 'message': 'Formulario enviado exitosamente',
-                'results': results
+                'results': results,
+                'recaptcha_evaluation': recaptcha_report
             })
         }
         
