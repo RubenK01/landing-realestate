@@ -32,6 +32,7 @@ const FormSection = ({ onHeightChange }) => {
     zone: ''    // Barrio de Madrid
   });
   const [accepted, setAccepted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const formRef = useRef(null);
   const [zonaInput, setZonaInput] = useState('');
   const [zonaDropdownOpen, setZonaDropdownOpen] = useState(false);
@@ -120,6 +121,9 @@ const FormSection = ({ onHeightChange }) => {
       alert('Debes aceptar recibir comunicaciones comerciales y la política de privacidad.');
       return;
     }
+    
+    setIsSubmitting(true);
+    
     try {
       fetch(`https://api.metodovende.es/prod/submit-form`, {
         method: 'POST',
@@ -138,11 +142,13 @@ const FormSection = ({ onHeightChange }) => {
             navigate('/thank-you');
           } else {
             // alert('Error al enviar el formulario');
+            setIsSubmitting(false);
           }
         })
         .catch(error => {
           console.error('Error:', error);
           // alert('Error de conexión');
+          setIsSubmitting(false);
         });
 
       // Envío a API Gateway de Conversiones (solo si acepta cookies)
@@ -178,13 +184,14 @@ const FormSection = ({ onHeightChange }) => {
     } catch (error) {
       console.error('Error:', error);
       alert('Error de conexión');
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="w-full h-full flex items-center justify-center">
       <div className="rounded-lg p-6 pb-8 w-full max-w-lg" ref={formRef}>
-        <h3 className="text-lg md:text-2xl text-white mb-4 text-left leading-tight">
+        <h3 className="text-lg md:text-2xl text-white mb-4 text-left leading-tight text-justify">
           <span className="font-extrabold">Vende</span> o <span className="font-extrabold">Alquila</span> tu propiedad en Madrid rápido, y sin perder valor con un método profesional <span className="font-extrabold">VERIFICADO</span>
         </h3>
         <p className="text-gray-300 mb-3 text-left text-xs md:text-sm leading-tight text-justify">
@@ -310,9 +317,21 @@ const FormSection = ({ onHeightChange }) => {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-200 ease-in-out transform hover:scale-105 text-xs md:text-sm"
+            disabled={isSubmitting}
+            className={`w-full font-medium py-2 px-4 rounded-md transition duration-200 ease-in-out transform text-xs md:text-sm ${
+              isSubmitting 
+                ? 'bg-gray-600 text-gray-300 cursor-not-allowed' 
+                : 'bg-blue-600 hover:bg-blue-700 text-white hover:scale-105'
+            }`}
           >
-            Enviar Mensaje
+            {isSubmitting ? (
+              <div className="flex items-center justify-center space-x-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span>Enviando...</span>
+              </div>
+            ) : (
+              'Enviar Mensaje'
+            )}
           </button>
           <p className="mt-1 w-full text-[10px] md:text-xs text-gray-400 text-left leading-tight break-words whitespace-normal">
             ¿Quieres saber más sobre el <span className="text-yellow-400">Método V.E.N.D.E.</span> o sobre mí?

@@ -16,7 +16,6 @@ const ThankYouSection = () => {
             controls
             preload="auto"
             autoPlay
-            loop
           >
             <source src="/Video_final.mov" type="video/mp4" />
             Tu navegador no soporta el elemento de video.
