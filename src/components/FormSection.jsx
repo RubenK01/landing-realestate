@@ -110,25 +110,26 @@ const FormSection = ({ onHeightChange }) => {
     setAccepted(e.target.checked);
   };
 
-  // Callback de reCAPTCHA
-  const onRecaptchaChange = (token) => {
-    setRecaptchaToken(token);
-    setRecaptchaError('');
+  // Función para ejecutar reCAPTCHA v3
+  const executeRecaptcha = async () => {
+    try {
+      if (window.grecaptcha && window.grecaptcha.ready) {
+        const token = await window.grecaptcha.execute('6LcvpngrAAAAANqmo28MvQayGcfjEatSBT7C_ziL', {action: 'submit'});
+        console.log('reCAPTCHA v3 token received:', token);
+        setRecaptchaToken(token);
+        setRecaptchaError('');
+        return token;
+      } else {
+        console.error('reCAPTCHA v3 not available');
+        setRecaptchaError('Error de verificación de seguridad');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error executing reCAPTCHA v3:', error);
+      setRecaptchaError('Error de verificación de seguridad');
+      return null;
+    }
   };
-
-  // Hacer la función disponible globalmente para reCAPTCHA
-  useEffect(() => {
-    // Función global para reCAPTCHA
-    window.onRecaptchaChange = (token) => {
-      console.log('reCAPTCHA token received:', token);
-      setRecaptchaToken(token);
-      setRecaptchaError('');
-    };
-    
-    return () => {
-      delete window.onRecaptchaChange;
-    };
-  }, []);
 
   // Obtiene fbp y fbc de cookies si existen
   const getCookie = (name) => {
@@ -145,19 +146,20 @@ const FormSection = ({ onHeightChange }) => {
       return;
     }
 
-    if (!recaptchaToken) {
-      setRecaptchaError('Por favor, completa el reCAPTCHA para continuar.');
-      return;
+    // Ejecutar reCAPTCHA v3 antes de enviar
+    const token = await executeRecaptcha();
+    if (!token) {
+      return; // Ya se muestra el error en executeRecaptcha
     }
     
     setIsSubmitting(true);
     setRecaptchaError('');
     
     try {
-      // Agregar el token de reCAPTCHA y consentimiento al payload
+      // Agregar el token de reCAPTCHA v3 y consentimiento al payload
       const formDataWithRecaptcha = {
         ...formData,
-        recaptchaToken: recaptchaToken,
+        recaptchaToken: token,
         consentCookies: getCookie('consentCookies') || 'false'
       };
 
@@ -175,19 +177,11 @@ const FormSection = ({ onHeightChange }) => {
             setZonaInput('');
             setAccepted(false);
             setRecaptchaToken('');
-            // Resetear reCAPTCHA
-            if (window.grecaptcha) {
-              window.grecaptcha.reset();
-            }
             // Redirigir a la página de agradecimiento
             navigate('/thank-you');
           } else {
             // alert('Error al enviar el formulario');
             setIsSubmitting(false);
-            // Resetear reCAPTCHA en caso de error
-            if (window.grecaptcha) {
-              window.grecaptcha.reset();
-            }
             setRecaptchaToken('');
           }
         })
@@ -195,10 +189,6 @@ const FormSection = ({ onHeightChange }) => {
           console.error('Error:', error);
           // alert('Error de conexión');
           setIsSubmitting(false);
-          // Resetear reCAPTCHA en caso de error
-          if (window.grecaptcha) {
-            window.grecaptcha.reset();
-          }
           setRecaptchaToken('');
         });
 
@@ -236,10 +226,6 @@ const FormSection = ({ onHeightChange }) => {
       console.error('Error:', error);
       alert('Error de conexión');
       setIsSubmitting(false);
-      // Resetear reCAPTCHA en caso de error
-      if (window.grecaptcha) {
-        window.grecaptcha.reset();
-      }
       setRecaptchaToken('');
     }
   };
@@ -371,16 +357,9 @@ const FormSection = ({ onHeightChange }) => {
             </label>
           </div>
 
-          {/* reCAPTCHA */}
-          <div className="flex justify-center">
-            <div 
-              className="g-recaptcha" 
-              data-sitekey={RECAPTCHA_SITE_KEY}
-              data-callback="onRecaptchaChange"
-            ></div>
-            <div className="text-xs text-gray-400 mt-2 text-center">
-              {process.env.NODE_ENV === 'development' ? 'Usando reCAPTCHA de prueba para desarrollo' : 'Verificación de seguridad'}
-            </div>
+          {/* reCAPTCHA v3 - Invisible */}
+          <div className="text-xs text-gray-400 text-center">
+            {process.env.NODE_ENV === 'development' ? 'Usando reCAPTCHA v3 de prueba para desarrollo' : 'Verificación de seguridad invisible'}
           </div>
           
           {recaptchaError && (

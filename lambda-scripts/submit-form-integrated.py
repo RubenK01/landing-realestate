@@ -33,7 +33,7 @@ ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
 
 def verify_recaptcha(token: str, environment: str = 'production') -> dict:
     """
-    Verifica el token de reCAPTCHA con Google
+    Verifica el token de reCAPTCHA v3 con Google
     """
     try:
         secret_key = RECAPTCHA_CONFIG[environment]['secret_key']
@@ -49,17 +49,26 @@ def verify_recaptcha(token: str, environment: str = 'production') -> dict:
         
         result = response.json()
         
+        # Para reCAPTCHA v3, verificamos el score (0.0 = bot, 1.0 = humano)
+        success = result.get('success', False)
+        score = result.get('score', 0.0)
+        action = result.get('action', '')
+        
+        # Consideramos exitoso si score >= 0.5 (puedes ajustar este umbral)
+        is_valid = success and score >= 0.5 and action == 'submit'
+        
         return {
-            'success': result.get('success', False),
-            'score': result.get('score', 0.0),
-            'action': result.get('action', ''),
+            'success': is_valid,
+            'score': score,
+            'action': action,
             'challenge_ts': result.get('challenge_ts', ''),
             'hostname': result.get('hostname', ''),
-            'error_codes': result.get('error-codes', [])
+            'error_codes': result.get('error-codes', []),
+            'raw_success': success
         }
         
     except Exception as e:
-        logger.error(f"Error verificando reCAPTCHA: {str(e)}")
+        logger.error(f"Error verificando reCAPTCHA v3: {str(e)}")
         return {
             'success': False,
             'error': f'Error de verificación: {str(e)}'
