@@ -24,11 +24,11 @@ const ThankYouSection = () => {
         
         {/* Text Content */}
         <div className="space-y-4 text-left">
-          <p className="text-lg text-gray-200">
+          <p className="text-lg text-gray-200 text-justify">
             Tu solicitud fue recibida correctamente. Ya estoy revisando tu caso y en breve me pondré en contacto contigo.
           </p>
           
-          <p className="text-gray-300">
+          <p className="text-gray-300 text-justify">
             Trabajo cada propiedad con una estrategia clara, datos reales y gestión profesional para que puedas vender bien, sin improvisaciones ni pérdidas de tiempo.
           </p>
           
