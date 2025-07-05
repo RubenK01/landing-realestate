@@ -17,7 +17,7 @@ const ThankYouSection = () => {
             preload="auto"
             autoPlay
           >
-            <source src="/Video_final.mov" type="video/mp4" />
+            <source src="/Video_final.mp4" type="video/mp4" />
             Tu navegador no soporta el elemento de video.
           </video>
         </div>
