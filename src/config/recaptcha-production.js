@@ -13,10 +13,6 @@ export const RECAPTCHA_SECRET_KEY = RECAPTCHA_PRODUCTION_CONFIG.secretKey;
 
 // Función para obtener la configuración
 export const getRecaptchaConfig = () => {
-  console.log('🔍 reCAPTCHA Production Config:');
-  console.log('📍 Hostname:', window.location.hostname);
-  console.log('🔑 Using Production Site Key:', RECAPTCHA_PRODUCTION_CONFIG.siteKey);
-  
   return RECAPTCHA_PRODUCTION_CONFIG;
 };
 

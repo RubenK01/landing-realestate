@@ -1,16 +1,16 @@
 import React from 'react';
 
 const Footer = () => (
-  <footer className="w-full flex justify-end items-center pr-6 pb-2 mt-8 gap-3">
-    <span className="text-xs md:text-sm text-gray-500 opacity-70 flex items-center gap-2">
+  <footer className="w-full flex justify-end items-center pr-6 pb-2 mt-8 gap-3 pb-14 md:pb-4">
+    <span className="text-xs md:text-sm text-gray-500 opacity-70 flex items-center gap-1">
       Powered by{' '}
       <a
         href="https://www.linkedin.com/in/ruben-casado-00ads1"
         target="_blank"
         rel="noopener noreferrer"
-        className="text-blue-400 no-underline hover:underline hover:text-blue-500 transition-colors"
+        className="text-white font-bold no-underline hover:underline hover:text-gray-300 transition-colors"
       >
-        RubenK01
+        RubenK
       </a>
       <a
         href="https://wa.me/34664656038"

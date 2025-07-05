@@ -95,22 +95,32 @@ def generate_recaptcha_report(recaptcha_result: dict) -> dict:
         score_category = "EXCELLENT"
         score_description = "Very likely human"
         score_emoji = "🔵"
+        recommended_action = "ALLOW"
+        action_description = "Permitir acceso completo"
     elif score >= 0.7:
         score_category = "GOOD"
         score_description = "Likely human"
         score_emoji = "🟢"
+        recommended_action = "ALLOW"
+        action_description = "Permitir acceso completo"
     elif score >= 0.5:
         score_category = "MEDIUM"
         score_description = "Possibly human"
         score_emoji = "🟡"
+        recommended_action = "ALLOW_WITH_MONITORING"
+        action_description = "Permitir pero monitorear"
     elif score >= 0.3:
         score_category = "LOW"
         score_description = "Possibly bot"
         score_emoji = "🟠"
+        recommended_action = "CHALLENGE"
+        action_description = "Solicitar verificación adicional"
     else:
         score_category = "VERY_LOW"
         score_description = "Very likely bot"
         score_emoji = "🔴"
+        recommended_action = "BLOCK"
+        action_description = "Bloquear acceso"
     
     # Evaluación de la acción
     action_correct = action == 'submit'
@@ -125,7 +135,9 @@ def generate_recaptcha_report(recaptcha_result: dict) -> dict:
             'value': score,
             'category': score_category,
             'description': score_description,
-            'emoji': score_emoji
+            'emoji': score_emoji,
+            'recommended_action': recommended_action,
+            'action_description': action_description
         },
         'action': {
             'value': action,
@@ -142,6 +154,123 @@ def generate_recaptcha_report(recaptcha_result: dict) -> dict:
         'timestamp': recaptcha_result.get('challenge_ts', ''),
         'raw_success': recaptcha_result.get('raw_success', False),
         'error_codes': recaptcha_result.get('error_codes', [])
+    }
+
+def execute_recaptcha_action(recaptcha_report: dict, form_data: dict) -> dict:
+    """
+    Ejecuta acciones automáticas basadas en la evaluación de reCAPTCHA
+    """
+    score = recaptcha_report['score']
+    recommended_action = score['recommended_action']
+    score_value = score['value']
+    
+    logger.info(f"=== EXECUTING reCAPTCHA ACTION: {recommended_action} ===")
+    logger.info(f"Score: {score_value} - {score['category']}")
+    logger.info(f"Action Description: {score['action_description']}")
+    
+    actions_taken = {
+        'recommended_action': recommended_action,
+        'action_description': score['action_description'],
+        'actions_executed': [],
+        'blocked': False,
+        'monitored': False,
+        'challenged': False
+    }
+    
+    # ===== ACCIONES AUTOMÁTICAS =====
+    
+    if recommended_action == "BLOCK":
+        # Score muy bajo - Bloquear completamente
+        logger.warning(f"🚫 BLOCKING: Score too low ({score_value}) - Very likely bot")
+        actions_taken['actions_executed'].append("BLOCKED_ACCESS")
+        actions_taken['blocked'] = True
+        
+        # No enviar a servicios externos
+        return {
+            'success': False,
+            'blocked': True,
+            'reason': f"reCAPTCHA score too low: {score_value}",
+            'actions_taken': actions_taken
+        }
+    
+    elif recommended_action == "CHALLENGE":
+        # Score bajo - Añadir verificación adicional
+        logger.warning(f"⚠️ CHALLENGE: Score low ({score_value}) - Additional verification needed")
+        actions_taken['actions_executed'].append("FLAGGED_FOR_REVIEW")
+        actions_taken['challenged'] = True
+        
+        # Enviar a servicios pero marcar para revisión
+        # Aquí podrías implementar lógica adicional como:
+        # - Enviar email de alerta al admin
+        # - Guardar en base de datos para revisión manual
+        # - Añadir delay artificial
+        
+    elif recommended_action == "ALLOW_WITH_MONITORING":
+        # Score medio - Permitir pero monitorear
+        logger.info(f"👁️ MONITORING: Score medium ({score_value}) - Allowing with monitoring")
+        actions_taken['actions_executed'].append("MONITORING_ENABLED")
+        actions_taken['monitored'] = True
+        
+        # Enviar a servicios pero con logging adicional
+        # Aquí podrías implementar:
+        # - Logging detallado
+        # - Métricas de monitoreo
+        # - Alertas si hay patrones sospechosos
+    
+    elif recommended_action == "ALLOW":
+        # Score alto - Permitir sin restricciones
+        logger.info(f"✅ ALLOWING: Score good ({score_value}) - Full access granted")
+        actions_taken['actions_executed'].append("FULL_ACCESS_GRANTED")
+    
+    # ===== ACCIONES ESPECÍFICAS POR SERVICIO =====
+    
+    # Mailchimp - Enviar siempre (excepto si está bloqueado)
+    if not actions_taken['blocked']:
+        logger.info("📧 Sending to Mailchimp...")
+        mailchimp_result = send_to_mailchimp(form_data)
+        actions_taken['actions_executed'].append(f"MAILCHIMP_{'SUCCESS' if mailchimp_result['success'] else 'FAILED'}")
+    else:
+        logger.info("📧 Skipping Mailchimp - User blocked")
+        actions_taken['actions_executed'].append("MAILCHIMP_SKIPPED")
+    
+    # Meta CAPI - Solo si aceptó cookies Y no está bloqueado
+    if not actions_taken['blocked'] and form_data.get('consentCookies') == 'true':
+        logger.info("📊 Sending to Meta CAPI...")
+        meta_result = send_to_meta_capi(form_data)
+        actions_taken['actions_executed'].append(f"META_CAPI_{'SUCCESS' if meta_result['success'] else 'FAILED'}")
+    else:
+        logger.info("📊 Skipping Meta CAPI - User blocked or no consent")
+        actions_taken['actions_executed'].append("META_CAPI_SKIPPED")
+    
+    # ===== ACCIONES DE MONITOREO =====
+    
+    if actions_taken['monitored']:
+        # Implementar acciones de monitoreo
+        logger.info("🔍 Adding monitoring data...")
+        actions_taken['actions_executed'].append("MONITORING_DATA_LOGGED")
+        
+        # Aquí podrías:
+        # - Guardar en CloudWatch Metrics
+        # - Enviar a sistema de alertas
+        # - Registrar en base de datos de monitoreo
+    
+    if actions_taken['challenged']:
+        # Implementar acciones de challenge
+        logger.info("🚨 Adding challenge data...")
+        actions_taken['actions_executed'].append("CHALLENGE_DATA_LOGGED")
+        
+        # Aquí podrías:
+        # - Enviar email de alerta
+        # - Guardar para revisión manual
+        # - Implementar rate limiting
+    
+    logger.info(f"=== COMPLETED reCAPTCHA ACTIONS ===")
+    logger.info(f"Actions taken: {actions_taken['actions_executed']}")
+    
+    return {
+        'success': not actions_taken['blocked'],
+        'blocked': actions_taken['blocked'],
+        'actions_taken': actions_taken
     }
 
 def send_to_mailchimp(form_data: dict) -> dict:
@@ -397,38 +526,27 @@ def lambda_handler(event, context):
         
         logger.info(f"reCAPTCHA validation successful for hostname: {recaptcha_result.get('hostname', '')}")
         
-        # ===== PROCESAMIENTO PRINCIPAL =====
-        # Aquí puedes agregar tu lógica de procesamiento principal
-        # Por ejemplo: enviar email, guardar en base de datos, etc.
+        # ===== EJECUTAR ACCIONES AUTOMÁTICAS BASADAS EN reCAPTCHA =====
+        logger.info("Executing automatic actions based on reCAPTCHA evaluation...")
+        action_result = execute_recaptcha_action(recaptcha_report, form_data)
         
-        # ===== ENVÍO A SERVICIOS EXTERNOS =====
-        results = {
-            'recaptcha_verified': True,
-            'hostname': recaptcha_result.get('hostname', ''),
-            'mailchimp': None,
-            'meta_capi': None
-        }
-        
-        # Verificar consentimiento de cookies
-        consent_cookies = form_data.get('consentCookies', 'false')
-        logger.info(f"User consent for cookies: {consent_cookies}")
-        
-        # Enviar a Mailchimp (siempre que esté configurado)
-        logger.info("Sending to Mailchimp...")
-        mailchimp_result = send_to_mailchimp(form_data)
-        results['mailchimp'] = mailchimp_result
-        
-        # Enviar a Meta CAPI SOLO si el usuario aceptó las cookies
-        if consent_cookies == 'true':
-            logger.info("User accepted cookies - sending to Meta CAPI...")
-            meta_result = send_to_meta_capi(form_data)
-            results['meta_capi'] = meta_result
-        else:
-            logger.info("User did not accept cookies - skipping Meta CAPI")
-            results['meta_capi'] = {
-                'success': False, 
-                'skipped': True, 
-                'reason': 'User did not accept cookies'
+        # Si está bloqueado, retornar error
+        if action_result['blocked']:
+            logger.warning(f"🚫 User blocked due to reCAPTCHA score")
+            return {
+                'statusCode': 403,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Methods': 'POST, OPTIONS'
+                },
+                'body': json.dumps({
+                    'success': False,
+                    'error': 'Access denied due to security check',
+                    'recaptcha_evaluation': recaptcha_report,
+                    'actions_taken': action_result['actions_taken']
+                })
             }
         
         # ===== RESPUESTA EXITOSA =====
@@ -442,9 +560,10 @@ def lambda_handler(event, context):
                 'Access-Control-Allow-Methods': 'POST, OPTIONS'
             },
             'body': json.dumps({
+                'success': True,
                 'message': 'Formulario enviado exitosamente',
-                'results': results,
-                'recaptcha_evaluation': recaptcha_report
+                'recaptcha_evaluation': recaptcha_report,
+                'actions_taken': action_result['actions_taken']
             })
         }
         

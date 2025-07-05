@@ -25,15 +25,7 @@ const isDevelopment = process.env.NODE_ENV === 'development' ||
 export const getRecaptchaConfig = () => {
   const config = isDevelopment ? RECAPTCHA_CONFIG.development : RECAPTCHA_CONFIG.production;
   
-  // Log para debugging
-  if (typeof window !== 'undefined') {
-    console.log('🔍 reCAPTCHA Config Debug:');
-    console.log('📍 Hostname:', window.location.hostname);
-    console.log('🌍 Protocol:', window.location.protocol);
-    console.log('🚪 Port:', window.location.port);
-    console.log('🔧 Is Development:', isDevelopment);
-    console.log('🔑 Using Site Key:', config.siteKey);
-  }
+
   
   return config;
 };

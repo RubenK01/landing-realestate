@@ -123,17 +123,16 @@ const FormSection = ({ onHeightChange }) => {
     try {
       if (window.grecaptcha && window.grecaptcha.ready) {
         const token = await window.grecaptcha.execute('6LcvpngrAAAAANqmo28MvQayGcfjEatSBT7C_ziL', {action: 'submit'});
-        console.log('reCAPTCHA v3 token received:', token);
+
         setRecaptchaToken(token);
         setRecaptchaError('');
         return token;
       } else {
-        console.error('reCAPTCHA v3 not available');
+
         setRecaptchaError('Error de verificación de seguridad');
         return null;
       }
     } catch (error) {
-      console.error('Error executing reCAPTCHA v3:', error);
       setRecaptchaError('Error de verificación de seguridad');
       return null;
     }
@@ -191,13 +190,10 @@ const FormSection = ({ onHeightChange }) => {
           }
         })
         .catch(error => {
-          console.error('Error:', error);
-          // alert('Error de conexión');
           setIsSubmitting(false);
           setRecaptchaToken('');
         });
     } catch (error) {
-      console.error('Error:', error);
       alert('Error de conexión');
       setIsSubmitting(false);
       setRecaptchaToken('');
@@ -332,9 +328,6 @@ const FormSection = ({ onHeightChange }) => {
           </div>
 
           {/* reCAPTCHA v3 - Invisible */}
-          <div className="text-xs text-gray-400 text-center">
-            {process.env.NODE_ENV === 'development' ? 'Usando reCAPTCHA v3 de prueba para desarrollo' : ''}
-          </div>
           
           {recaptchaError && (
             <div className="text-red-400 text-xs text-center">
