@@ -49,6 +49,23 @@ const PoliticaCookies = () => {
 
           <section>
             <h2 className="text-2xl font-bold text-white mb-4 text-left border-b border-gray-700 pb-2">
+              Responsable del tratamiento
+            </h2>
+            <div className="space-y-2">
+              <p>
+                <span className="font-semibold">● Nombre o razón social:</span> Franco Diego Marcó – NIF Z-1108935-H
+              </p>
+              <p>
+                <span className="font-semibold">● Email de contacto:</span>{' '}
+                <a href="mailto:madrid@metodovende.es" className="text-blue-400 hover:text-blue-300 underline">
+                  madrid@metodovende.es
+                </a>
+              </p>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-white mb-4 text-left border-b border-gray-700 pb-2">
               Tipos de cookies que utilizamos
             </h2>
             <div className="space-y-4">
