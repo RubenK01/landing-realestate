@@ -1,0 +1,195 @@
+/* ========================================
+   OPCIONES PARA EL BADGE DE reCAPTCHA v3
+   ======================================== */
+
+/* OPCIÓN 1: Badge responsive - izquierda en desktop, arriba en móvil */
+.recaptcha-left {
+  .grecaptcha-badge {
+    /* Desktop: esquina inferior izquierda */
+    left: 0 !important;
+    right: auto !important;
+    bottom: 0 !important;
+    top: auto !important;
+    position: fixed !important;
+    z-index: 9999 !important;
+  }
+  
+  /* Móvil: esquina superior izquierda para no tapar firma */
+  @media (max-width: 768px) {
+    .grecaptcha-badge {
+      left: 0 !important;
+      right: auto !important;
+      top: 0 !important;
+      bottom: auto !important;
+      transform: scale(0.8) !important;
+    }
+  }
+}
+
+/* OPCIÓN 2: Ocultar badge y mostrar texto personalizado */
+.recaptcha-hidden {
+  .grecaptcha-badge {
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+  
+  .recaptcha-text {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    z-index: 9999;
+    font-size: 10px;
+    color: #666;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: Arial, sans-serif;
+  }
+}
+
+/* OPCIÓN 3: Badge más pequeño y discreto */
+.recaptcha-small {
+  .grecaptcha-badge {
+    transform: scale(0.8) !important;
+    left: 10px !important;
+    bottom: 10px !important;
+    right: auto !important;
+    top: auto !important;
+  }
+}
+
+/* OPCIÓN 4: Badge en la esquina superior izquierda */
+.recaptcha-top-left {
+  .grecaptcha-badge {
+    left: 0 !important;
+    right: auto !important;
+    top: 0 !important;
+    bottom: auto !important;
+    position: fixed !important;
+    z-index: 9999 !important;
+  }
+}
+
+/* OPCIÓN 5: Badge en la esquina superior derecha */
+.recaptcha-top-right {
+  .grecaptcha-badge {
+    left: auto !important;
+    right: 0 !important;
+    top: 0 !important;
+    bottom: auto !important;
+    position: fixed !important;
+    z-index: 9999 !important;
+  }
+}
+
+/* OPCIÓN 6: Badge inteligente - evita firma automáticamente */
+.recaptcha-smart {
+  .grecaptcha-badge {
+    /* Desktop: esquina inferior izquierda */
+    left: 0 !important;
+    right: auto !important;
+    bottom: 0 !important;
+    top: auto !important;
+    position: fixed !important;
+    z-index: 9999 !important;
+  }
+  
+  /* Tablet: esquina superior izquierda */
+  @media (max-width: 1024px) and (min-width: 769px) {
+    .grecaptcha-badge {
+      left: 0 !important;
+      right: auto !important;
+      top: 0 !important;
+      bottom: auto !important;
+      transform: scale(0.9) !important;
+    }
+  }
+  
+  /* Móvil: esquina superior derecha (lejos de firma) */
+  @media (max-width: 768px) {
+    .grecaptcha-badge {
+      left: auto !important;
+      right: 0 !important;
+      top: 0 !important;
+      bottom: auto !important;
+      transform: scale(0.7) !important;
+    }
+  }
+  
+  /* Móvil muy pequeño: centrado arriba */
+  @media (max-width: 480px) {
+    .grecaptcha-badge {
+      left: 50% !important;
+      right: auto !important;
+      top: 0 !important;
+      bottom: auto !important;
+      transform: translateX(-50%) scale(0.6) !important;
+    }
+  }
+}
+
+/* ========================================
+   ESTILOS PARA EL TEXTO PERSONALIZADO
+   ======================================== */
+
+.recaptcha-text {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  z-index: 9999;
+  font-size: 10px;
+  color: #666;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: Arial, sans-serif;
+  backdrop-filter: blur(2px);
+}
+
+.recaptcha-text a {
+  color: #999;
+  text-decoration: none;
+}
+
+.recaptcha-text a:hover {
+  color: #ccc;
+  text-decoration: underline;
+}
+
+/* ========================================
+   RESPONSIVE PARA MÓVILES
+   ======================================== */
+
+@media (max-width: 768px) {
+  .recaptcha-text {
+    font-size: 8px;
+    padding: 1px 4px;
+  }
+  
+  .recaptcha-small .grecaptcha-badge {
+    transform: scale(0.6) !important;
+  }
+}
+
+/* ========================================
+   ESPACIO PARA EL BADGE DE reCAPTCHA
+   ======================================== */
+
+/* Añadir espacio al footer para evitar que el badge lo tape */
+footer {
+  padding-bottom: 60px !important;
+}
+
+/* En móviles, menos espacio porque el badge es más pequeño */
+@media (max-width: 768px) {
+  footer {
+    padding-bottom: 40px !important;
+  }
+}
+
+/* En tablets, espacio intermedio */
+@media (min-width: 769px) and (max-width: 1024px) {
+  footer {
+    padding-bottom: 50px !important;
+  }
+} 

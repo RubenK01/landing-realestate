@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test reCAPTCHA Simple</title>
+    <!-- reCAPTCHA v3 -->
+    <script src="https://www.google.com/recaptcha/api.js?render=6LcvpngrAAAAANqmo28MvQayGcfjEatSBT7C_ziL"></script>
+    <link rel="stylesheet" href="/src/recaptcha-simple.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #000;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .content {
+            flex: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .test-info {
+            background: #333;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .mock-footer {
+            background: #dc3545;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px;
+        }
+        .space-indicator {
+            background: #28a745;
+            color: white;
+            padding: 5px;
+            text-align: center;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1>🧪 Test reCAPTCHA Simple</h1>
+        
+        <div class="test-info">
+            <h3>📋 Información</h3>
+            <p><strong>Solución:</strong> Añadir padding-bottom al footer</p>
+            <p><strong>Badge:</strong> Posición por defecto (esquina inferior derecha)</p>
+            <p><strong>Espacio añadido:</strong> 60px en desktop, 40px en móvil</p>
+        </div>
+        
+        <div style="height: 500px; background: linear-gradient(45deg, #333, #444); padding: 20px; border-radius: 5px;">
+            <h2>📄 Contenido de Prueba</h2>
+            <p>Este contenido simula tu página web. El badge de reCAPTCHA debería aparecer en la esquina inferior derecha sin tapar tu firma.</p>
+            <p>Cambia el tamaño de la ventana para ver cómo se adapta el espacio.</p>
+        </div>
+        
+        <div class="mock-footer">
+            🖋️ Powered by RubenK01 - Tu Firma Aquí
+        </div>
+        
+        <div class="space-indicator">
+            📏 Espacio añadido para reCAPTCHA (verde)
+        </div>
+    </div>
+
+    <!-- Texto personalizado de reCAPTCHA -->
+    <div class="recaptcha-text">Este sitio está protegido por reCAPTCHA y se aplican la <a href="https://policies.google.com/privacy" target="_blank">Política de Privacidad</a> y los <a href="https://policies.google.com/terms" target="_blank">Términos de Servicio</a> de Google.</div>
+
+    <script>
+        // Test de reCAPTCHA
+        window.testRecaptcha = function() {
+            if (typeof grecaptcha !== 'undefined' && grecaptcha.ready) {
+                grecaptcha.ready(function() {
+                    grecaptcha.execute('6LcvpngrAAAAANqmo28MvQayGcfjEatSBT7C_ziL', {action: 'submit'})
+                        .then(function(token) {
+                            console.log('✅ reCAPTCHA funcionando:', token.substring(0, 20) + '...');
+                            alert('✅ reCAPTCHA funcionando correctamente');
+                        })
+                        .catch(function(error) {
+                            console.error('❌ Error reCAPTCHA:', error);
+                            alert('❌ Error en reCAPTCHA: ' + error);
+                        });
+                });
+            } else {
+                alert('❌ reCAPTCHA no disponible');
+            }
+        };
+        
+        console.log('🧪 Test reCAPTCHA Simple cargado');
+        console.log('💡 Usa testRecaptcha() para probar la funcionalidad');
+        console.log('💡 El badge debería estar en la esquina inferior derecha');
+        console.log('💡 Tu firma debería estar separada por el espacio verde');
+    </script>
+</body>
+</html> 
