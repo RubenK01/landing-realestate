@@ -30,7 +30,7 @@ const FormSection = ({ onHeightChange }) => {
     email: '',
     phone: '',
     operation: '', // Alquiler o Compra
-    zone: ''    // Barrio de Madrid
+    zone: ''    // zone de Madrid
   });
   const [accepted, setAccepted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -199,7 +199,7 @@ const FormSection = ({ onHeightChange }) => {
           email: formData.email,
           name: formData.name,
           operation: formData.operation,
-          zone: formData.barrio,
+          zone: formData.zone,
           phone: formData.phone || undefined,
           fbp: getCookie('_fbp'),
           fbc: getCookie('_fbc'),
@@ -262,8 +262,8 @@ const FormSection = ({ onHeightChange }) => {
           <div className="relative">
             <input
               type="text"
-              id="barrio"
-              name="barrio"
+              id="zone"
+              name="zone"
               autoComplete="off"
               value={zonaInput}
               onChange={handleZonaInput}
