@@ -68,7 +68,7 @@ const FormSection = ({ onHeightChange }) => {
   // Cuando selecciona una zona del dropdown
   const handleZonaSelect = (zone) => {
     setFormData({ ...formData, zone: zone });
-    setZonaInput(zona);
+    setZonaInput(zone);
     setZonaDropdownOpen(false);
   };
 
