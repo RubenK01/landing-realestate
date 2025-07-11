@@ -13,21 +13,27 @@ const RECAPTCHA_CONFIG = {
   }
 };
 
-// Determinar el entorno
-const isDevelopment = process.env.NODE_ENV === 'development' || 
-                     window.location.hostname === 'localhost' ||
-                     window.location.hostname === '127.0.0.1' ||
-                     window.location.hostname.includes('localhost') ||
-                     window.location.hostname.includes('127.0.0.1') ||
-                     (window.location.port && (window.location.port === '5173' || window.location.port === '3000'));
+// Determinar el entorno de forma segura
+const getEnvironment = () => {
+  if (typeof window === 'undefined') {
+    // En el servidor, usar desarrollo por defecto
+    return 'development';
+  }
+  
+  return (process.env.NODE_ENV === 'development' || 
+          window.location.hostname === 'localhost' ||
+          window.location.hostname === '127.0.0.1' ||
+          window.location.hostname.includes('localhost') ||
+          window.location.hostname.includes('127.0.0.1') ||
+          (window.location.port && (window.location.port === '5173' || window.location.port === '3000'))) 
+    ? 'development' 
+    : 'production';
+};
 
 // Exportar la configuración según el entorno
 export const getRecaptchaConfig = () => {
-  const config = isDevelopment ? RECAPTCHA_CONFIG.development : RECAPTCHA_CONFIG.production;
-  
-
-  
-  return config;
+  const environment = getEnvironment();
+  return RECAPTCHA_CONFIG[environment];
 };
 
 // Exportar solo la site key para uso directo

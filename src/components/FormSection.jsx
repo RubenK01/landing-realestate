@@ -127,11 +127,17 @@ const FormSection = ({ onHeightChange }) => {
   // Función para ejecutar reCAPTCHA v3 (actualizada)
   const handleExecuteRecaptcha = async () => {
     try {
+      console.log('Iniciando ejecución de reCAPTCHA...');
+      console.log('Estado de reCAPTCHA:', { isLoaded: recaptchaLoaded, error: recaptchaError });
+      
       const token = await executeRecaptcha('submit');
+      console.log('Token de reCAPTCHA obtenido:', token ? 'sí' : 'no');
+      
       setRecaptchaToken(token);
       setRecaptchaErrorState('');
       return token;
     } catch (error) {
+      console.error('Error en handleExecuteRecaptcha:', error);
       setRecaptchaErrorState('Error de verificación de seguridad');
       return null;
     }
@@ -139,21 +145,30 @@ const FormSection = ({ onHeightChange }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('Formulario enviado - Iniciando proceso...');
+    
     if (!accepted) {
       alert('Debes aceptar recibir comunicaciones comerciales y la política de privacidad.');
       return;
     }
 
+    console.log('Checkbox aceptado - Ejecutando reCAPTCHA...');
+    
     // Ejecutar reCAPTCHA v3 antes de enviar
-    const token = await handleExecuteRecaptcha();
-    if (!token) {
-      return; // Ya se muestra el error en handleExecuteRecaptcha
-    }
-    
-    setIsSubmitting(true);
-    setRecaptchaErrorState('');
-    
     try {
+      const token = await handleExecuteRecaptcha();
+      console.log('reCAPTCHA ejecutado, token:', token ? 'obtenido' : 'no obtenido');
+      
+      if (!token) {
+        console.log('No se obtuvo token de reCAPTCHA');
+        return; // Ya se muestra el error en handleExecuteRecaptcha
+      }
+      
+      setIsSubmitting(true);
+      setRecaptchaErrorState('');
+      
+      console.log('Enviando formulario al servidor...');
+      
       // Agregar el token de reCAPTCHA v3 y toda la info necesaria al payload
       const formDataWithRecaptcha = {
         ...formData,
@@ -166,6 +181,8 @@ const FormSection = ({ onHeightChange }) => {
         client_user_agent: navigator.userAgent
       };
 
+      console.log('Datos del formulario:', formDataWithRecaptcha);
+
       fetch(`https://api.metodovende.es/prod/submit-form`, {
         method: 'POST',
         headers: {
@@ -174,6 +191,7 @@ const FormSection = ({ onHeightChange }) => {
         body: JSON.stringify(formDataWithRecaptcha)
       })
         .then(response => {
+          console.log('Respuesta del servidor:', response.status, response.ok);
           if (response.ok) {
             // alert('Formulario enviado exitosamente!');
             setFormData({ name: '', email: '', phone: '', operation: '', zone: '' });
@@ -189,10 +207,12 @@ const FormSection = ({ onHeightChange }) => {
           }
         })
         .catch(error => {
+          console.error('Error en fetch:', error);
           setIsSubmitting(false);
           setRecaptchaToken('');
         });
     } catch (error) {
+      console.error('Error en handleSubmit:', error);
       alert('Error de conexión');
       setIsSubmitting(false);
       setRecaptchaToken('');

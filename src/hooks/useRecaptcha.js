@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-import { RECAPTCHA_SITE_KEY } from '../config/recaptcha';
+import { useState, useCallback } from 'react';
+
+// Clave de reCAPTCHA hardcodeada para evitar problemas de importación
+const RECAPTCHA_SITE_KEY = '6LcvpngrAAAAANqmo28MvQayGcfjEatSBT7C_ziL';
 
 export const useRecaptcha = () => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -50,7 +52,7 @@ export const useRecaptcha = () => {
           }
         }, 100);
 
-        // Timeout de seguridad (10 segundos)
+        // Timeout de seguridad (5 segundos)
         setTimeout(() => {
           clearInterval(checkReady);
           if (!window.grecaptcha || !window.grecaptcha.ready) {
@@ -58,7 +60,7 @@ export const useRecaptcha = () => {
             setError('Timeout al cargar reCAPTCHA');
             reject(new Error('Timeout al cargar reCAPTCHA'));
           }
-        }, 10000);
+        }, 5000);
       };
 
       script.onerror = () => {
