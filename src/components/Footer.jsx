@@ -1,8 +1,8 @@
 import React from 'react';
 
 const Footer = () => (
-  <footer className="w-full flex justify-end items-center pr-6 pb-2 mt-8 gap-3 pb-20 md:pb-4">
-    <span className="text-xs md:text-sm text-gray-500 opacity-70 flex items-center gap-1">
+  <footer className="w-full flex flex-col pr-6 pb-2 mt-8 gap-3 md:pb-4 p-4">
+    <span className="self-end text-xs md:text-sm text-gray-500 opacity-70 flex items-center gap-1">
       Powered by{' '}
       <a
         href="https://www.linkedin.com/in/ruben-casado-00ads1"
@@ -31,6 +31,29 @@ const Footer = () => (
         </svg>
       </a>
     </span>
+
+    <div className="text-xs text-gray-500 opacity-70 text-left">
+      Este sitio está protegido por reCAPTCHA y se aplican la{' '}
+      <a 
+        href="https://policies.google.com/privacy" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="text-blue-500 hover:text-blue-600 underline"
+      >
+        Política de Privacidad
+      </a>{' '}
+      y los{' '}
+      <a 
+        href="https://policies.google.com/terms" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="text-blue-500 hover:text-gray-700 underline"
+      >
+        Términos de Servicio
+      </a>{' '}
+      de Google.
+    </div>
+    
   </footer>
 );
 

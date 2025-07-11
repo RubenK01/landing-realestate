@@ -42,25 +42,30 @@ function App() {
   useAnalytics(cookiesAccepted);
 
   return (
-    <div className="flex flex-col min-h-screen bg-black">
-      {/* Área principal siempre centrada */}
-      <div className="flex-1 flex items-center justify-center">
-        <Routes>
-          <Route path="/" element={<Home formHeight={formHeight} setFormHeight={setFormHeight} />} />
-          <Route path="/politica-cookies" element={<PoliticaCookies />} />
-          <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
-          <Route path="/thank-you" element={<ThankYouSection />} />
-          <Route path="/metodo-inmobiliario" element={<MetodoInmobiliarioSection />} />
-        </Routes>
+    <div>
+      <div className="flex flex-col min-h-screen bg-black">
+        {/* Área principal siempre centrada */}
+        <div className="flex-1 flex items-center justify-center">
+          <Routes>
+            <Route path="/" element={<Home formHeight={formHeight} setFormHeight={setFormHeight} />} />
+            <Route path="/politica-cookies" element={<PoliticaCookies />} />
+            <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
+            <Route path="/thank-you" element={<ThankYouSection />} />
+            <Route path="/metodo-inmobiliario" element={<MetodoInmobiliarioSection />} />
+          </Routes>
+        </div>
+        
+        {/* Banner de cookies siempre fixed abajo */}
+        <CookieBanner 
+          onAccept={() => setCookiesAccepted(true)}
+          onDecline={() => setCookiesAccepted(false)}
+        />
+        <Footer />
       </div>
       
-      {/* Banner de cookies siempre fixed abajo */}
-      <CookieBanner 
-        onAccept={() => setCookiesAccepted(true)}
-        onDecline={() => setCookiesAccepted(false)}
-      />
-      <Footer />
+      
     </div>
+    
   );
 }
 

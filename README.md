@@ -12,6 +12,7 @@ Una landing page moderna y profesional para el sector inmobiliario, construida c
 - [Despliegue](#-despliegue)
 - [Estructura del Proyecto](#-estructura-del-proyecto)
 - [Configuración](#-configuración)
+- [Gestión de reCAPTCHA v3](#️-gestión-de-recaptcha-v3)
 - [Buenas Prácticas](#-buenas-prácticas)
 - [Contribución](#-contribución)
 - [Licencia](#-licencia)
@@ -23,6 +24,7 @@ Una landing page moderna y profesional para el sector inmobiliario, construida c
 - 🍪 **Gestión de Cookies**: Banner de consentimiento GDPR compliant
 - 📊 **Analytics**: Integración con Google Analytics, Meta Pixel y GTM
 - 🔄 **Conversiones**: API de conversiones de Meta para tracking avanzado
+- 🛡️ **reCAPTCHA v3**: Protección invisible contra bots con evaluación inteligente
 - 🎥 **Contenido Multimedia**: Videos optimizados y secciones interactivas
 - 📝 **Formularios Inteligentes**: Autocompletado y validación avanzada
 - 🚀 **Performance**: Optimizado para velocidad y SEO
@@ -46,6 +48,7 @@ landing-frontend/
 │   └── assets/              # Recursos estáticos
 ├── public/                  # Archivos públicos
 ├── lambda-scripts/          # Funciones Lambda para APIs
+│   ├── submit-form-integrated.py  # Lambda unificado con reCAPTCHA
 │   ├── CAPI/               # Meta Conversions API
 │   └── mailchimp/          # Integración Mailchimp
 ├── package.json
@@ -58,9 +61,16 @@ landing-frontend/
 ### Flujo de Datos
 
 ```
-Usuario → Formulario → Validación → APIs Paralelas
-                                    ├── Backend Principal
-                                    └── Meta Conversions API
+Usuario → Formulario → reCAPTCHA v3 → Evaluación → Acciones Automáticas
+                                    ├── Score ≥ 0.9: ALLOW
+                                    ├── Score 0.7-0.9: ALLOW
+                                    ├── Score 0.5-0.7: MONITORING
+                                    ├── Score 0.3-0.5: CHALLENGE
+                                    └── Score < 0.3: BLOCK
+                                    ↓
+                                    APIs Paralelas
+                                    ├── Mailchimp (siempre)
+                                    └── Meta CAPI (si consentimiento)
 ```
 
 ### Arquitectura AWS
@@ -105,6 +115,11 @@ Usuario → Formulario → Validación → APIs Paralelas
 - **Meta Pixel** - Tracking de Facebook
 - **Google Tag Manager** - Gestión de tags
 - **Meta Conversions API** - Tracking server-side
+
+### Seguridad
+- **reCAPTCHA v3** - Protección invisible contra bots
+- **Evaluación Inteligente** - Score-based actions automáticas
+- **Validación Server-side** - Verificación en Lambda
 
 ### Infraestructura AWS
 - **AWS Amplify** - Hosting, CDN y CI/CD automático
@@ -286,6 +301,10 @@ VITE_GTM_ID=GTM-XXXXXXX
 VITE_API_URL=https://tu-api.com
 VITE_META_CONVERSIONS_API=https://tu-lambda.com
 
+# reCAPTCHA v3
+RECAPTCHA_SITE_KEY=6LcvpngrAAAAANqmo28MvQayGcfjEatSBT7C_ziL
+RECAPTCHA_SECRET_KEY=TU_SECRET_KEY_REAL
+
 # Configuración
 VITE_APP_NAME=Método V.E.N.D.E.
 VITE_APP_URL=https://metodovende.es
@@ -368,6 +387,141 @@ def lambda_handler(event, context):
         'body': json.dumps('Success')
     }
 ```
+
+## 🛡️ Gestión de reCAPTCHA v3
+
+### Configuración
+
+El proyecto utiliza **reCAPTCHA v3** para protección invisible contra bots. La implementación incluye:
+
+#### Frontend (React)
+```javascript
+// src/config/recaptcha.js
+const RECAPTCHA_CONFIG = {
+  development: {
+    siteKey: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', // Test key
+  },
+  production: {
+    siteKey: '6LcvpngrAAAAANqmo28MvQayGcfjEatSBT7C_ziL', // Real key
+  }
+};
+```
+
+#### Backend (Lambda)
+```python
+# lambda-scripts/submit-form-integrated.py
+def validate_recaptcha_v3(token: str, client_ip: str) -> dict:
+    """Valida token de reCAPTCHA v3 con Google"""
+    # Validación server-side
+    # Retorna score, action, hostname, etc.
+```
+
+### Sistema de Evaluación
+
+#### Scores y Acciones Automáticas
+
+| Score | Categoría | Acción | Comportamiento |
+|-------|-----------|--------|----------------|
+| ≥0.9 | 🔵 EXCELLENT | `ALLOW` | Acceso completo |
+| 0.7-0.9 | 🟢 GOOD | `ALLOW` | Acceso completo |
+| 0.5-0.7 | 🟡 MEDIUM | `MONITORING` | Permitir + monitorear |
+| 0.3-0.5 | 🟠 LOW | `CHALLENGE` | Permitir + revisar |
+| <0.3 | 🔴 VERY_LOW | `BLOCK` | Bloquear acceso |
+
+#### Acciones Específicas por Servicio
+
+- **Mailchimp**: Se envía siempre (excepto si está bloqueado)
+- **Meta CAPI**: Solo si aceptó cookies Y no está bloqueado
+- **Logs**: Detallados con emojis y categorías
+
+### Configuración de Claves
+
+#### Desarrollo
+```env
+# Usar claves de prueba de Google
+RECAPTCHA_SITE_KEY=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
+RECAPTCHA_SECRET_KEY=6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe
+```
+
+#### Producción
+```env
+# Claves reales para metodovende.es
+RECAPTCHA_SITE_KEY=6LcvpngrAAAAANqmo28MvQayGcfjEatSBT7C_ziL
+RECAPTCHA_SECRET_KEY=TU_SECRET_KEY_REAL
+```
+
+### Implementación en el Formulario
+
+```jsx
+// src/components/FormSection.jsx
+const executeRecaptcha = async () => {
+  try {
+    if (window.grecaptcha && window.grecaptcha.ready) {
+      const token = await window.grecaptcha.execute(
+        RECAPTCHA_SITE_KEY, 
+        {action: 'submit'}
+      );
+      return token;
+    }
+  } catch (error) {
+    setRecaptchaError('Error de verificación de seguridad');
+    return null;
+  }
+};
+```
+
+### Logs y Monitoreo
+
+#### Logs Automáticos
+```
+=== EXECUTING reCAPTCHA ACTION: ALLOW_WITH_MONITORING ===
+Score: 0.6 - MEDIUM
+Action Description: Permitir pero monitorear
+👁️ MONITORING: Score medium (0.6) - Allowing with monitoring
+📧 Sending to Mailchimp...
+📊 Sending to Meta CAPI...
+🔍 Adding monitoring data...
+=== COMPLETED reCAPTCHA ACTIONS ===
+Actions taken: ['MONITORING_ENABLED', 'MAILCHIMP_SUCCESS', 'META_CAPI_SUCCESS']
+```
+
+#### Métricas Recomendadas
+- `recaptcha_score_distribution` - Distribución de scores
+- `recaptcha_actions_taken` - Acciones ejecutadas
+- `blocked_submissions` - Envíos bloqueados
+
+### Personalización
+
+#### Ajustar Umbrales
+```python
+# En lambda-scripts/submit-form-integrated.py
+if score >= 0.95:      # Más estricto
+elif score >= 0.8:    
+elif score >= 0.6:    
+elif score >= 0.4:    
+else:                 
+
+# O más permisivo
+if score >= 0.8:      
+elif score >= 0.6:    
+elif score >= 0.4:    
+elif score >= 0.2:    
+else:                 
+```
+
+#### Acciones Adicionales
+- **Rate Limiting** por IP
+- **Alertas** por email para scores bajos
+- **Blacklist/Whitelist** de IPs
+- **Métricas** en CloudWatch
+
+### Consideraciones de Seguridad
+
+1. **Nunca confíes solo en reCAPTCHA** - Combina con otras medidas
+2. **Monitorea patrones** - Busca ataques coordinados
+3. **Ajusta umbrales gradualmente** - Basado en datos reales
+4. **Mantén logs** - Para análisis forense
+5. **Respetar GDPR** - Solo enviar a Meta si hay consentimiento
 
 ## 📚 Buenas Prácticas
 

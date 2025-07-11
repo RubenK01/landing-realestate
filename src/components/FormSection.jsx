@@ -207,7 +207,7 @@ const FormSection = ({ onHeightChange }) => {
           <span className="font-extrabold">Vende</span> o <span className="font-extrabold">Alquila</span> tu propiedad en Madrid rápido, y sin perder valor con un método profesional <span className="font-extrabold">VERIFICADO</span>
         </h3>
         <p className="text-gray-300 mb-3 text-left text-xs md:text-sm leading-tight text-justify">
-          Vende o alquila tu propiedad en Madrid en menos de 45 días, al mejor precio y con gestión 100% profesional, gracias al <span className="font-semibold text-yellow-400">Método V.E.N.D.E.®</span>: visibilidad total, estrategia precisa y control absoluto de todo el proceso.
+          Vende o alquila tu propiedad en Madrid en menos de 45 días al mejor precio y con gestión 100% profesional, gracias al <span className="font-semibold text-yellow-400">Método V.E.N.D.E.</span>: visibilidad total, estrategia precisa y control absoluto de todo el proceso.
         </p>
         <h2 className="text-lg md:text-xl font-bold text-white mb-4 text-left">
           Contáctanos
@@ -299,8 +299,9 @@ const FormSection = ({ onHeightChange }) => {
               name="phone"
               value={formData.phone}
               onChange={handleChange}
+              required
               className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-800 text-white text-xs md:text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Teléfono (opcional)"
+              placeholder="Teléfono"
             />
           </div>
 
