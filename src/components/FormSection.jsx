@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { RECAPTCHA_SITE_KEY } from '../config/recaptcha';
+import { useRecaptcha } from '../hooks/useRecaptcha';
 
 const zonasMadrid = [
   {
@@ -25,6 +25,7 @@ const zonasMadrid = [
 
 const FormSection = ({ onHeightChange }) => {
   const navigate = useNavigate();
+  const { executeRecaptcha, isLoaded: recaptchaLoaded, error: recaptchaError, preloadRecaptcha } = useRecaptcha();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -35,7 +36,7 @@ const FormSection = ({ onHeightChange }) => {
   const [accepted, setAccepted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState('');
-  const [recaptchaError, setRecaptchaError] = useState('');
+  const [recaptchaErrorState, setRecaptchaErrorState] = useState('');
   const formRef = useRef(null);
   const [zonaInput, setZonaInput] = useState('');
   const [zonaDropdownOpen, setZonaDropdownOpen] = useState(false);
@@ -112,28 +113,26 @@ const FormSection = ({ onHeightChange }) => {
       ...formData,
       [e.target.name]: e.target.value
     });
+    
+    // Precargar reCAPTCHA cuando el usuario empiece a llenar el formulario
+    if (!recaptchaLoaded && (e.target.name === 'name' || e.target.name === 'email')) {
+      preloadRecaptcha();
+    }
   };
 
   const handleCheckbox = (e) => {
     setAccepted(e.target.checked);
   };
 
-  // Función para ejecutar reCAPTCHA v3
-  const executeRecaptcha = async () => {
+  // Función para ejecutar reCAPTCHA v3 (actualizada)
+  const handleExecuteRecaptcha = async () => {
     try {
-      if (window.grecaptcha && window.grecaptcha.ready) {
-        const token = await window.grecaptcha.execute('6LcvpngrAAAAANqmo28MvQayGcfjEatSBT7C_ziL', {action: 'submit'});
-
-        setRecaptchaToken(token);
-        setRecaptchaError('');
-        return token;
-      } else {
-
-        setRecaptchaError('Error de verificación de seguridad');
-        return null;
-      }
+      const token = await executeRecaptcha('submit');
+      setRecaptchaToken(token);
+      setRecaptchaErrorState('');
+      return token;
     } catch (error) {
-      setRecaptchaError('Error de verificación de seguridad');
+      setRecaptchaErrorState('Error de verificación de seguridad');
       return null;
     }
   };
@@ -146,13 +145,13 @@ const FormSection = ({ onHeightChange }) => {
     }
 
     // Ejecutar reCAPTCHA v3 antes de enviar
-    const token = await executeRecaptcha();
+    const token = await handleExecuteRecaptcha();
     if (!token) {
-      return; // Ya se muestra el error en executeRecaptcha
+      return; // Ya se muestra el error en handleExecuteRecaptcha
     }
     
     setIsSubmitting(true);
-    setRecaptchaError('');
+    setRecaptchaErrorState('');
     
     try {
       // Agregar el token de reCAPTCHA v3 y toda la info necesaria al payload
@@ -330,9 +329,9 @@ const FormSection = ({ onHeightChange }) => {
 
           {/* reCAPTCHA v3 - Invisible */}
           
-          {recaptchaError && (
+          {recaptchaErrorState && (
             <div className="text-red-400 text-xs text-center">
-              {recaptchaError}
+              {recaptchaErrorState}
             </div>
           )}
 
