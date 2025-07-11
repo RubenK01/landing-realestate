@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
 // Clave de reCAPTCHA hardcodeada para evitar problemas de importación
 const RECAPTCHA_SITE_KEY = '6LcvpngrAAAAANqmo28MvQayGcfjEatSBT7C_ziL';
@@ -7,33 +7,26 @@ export const useRecaptcha = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const loadingPromiseRef = useRef(null);
 
   // Función para cargar el script de reCAPTCHA dinámicamente
   const loadRecaptchaScript = useCallback(() => {
-    return new Promise((resolve, reject) => {
-      // Si ya está cargado, resolver inmediatamente
-      if (window.grecaptcha && window.grecaptcha.ready) {
-        setIsLoaded(true);
-        resolve();
-        return;
-      }
+    // Si ya hay una promesa de carga en curso, devolverla
+    if (loadingPromiseRef.current) {
+      return loadingPromiseRef.current;
+    }
 
-      // Si ya se está cargando, esperar
-      if (isLoading) {
-        const checkLoaded = setInterval(() => {
-          if (window.grecaptcha && window.grecaptcha.ready) {
-            clearInterval(checkLoaded);
-            setIsLoaded(true);
-            setIsLoading(false);
-            resolve();
-          }
-        }, 100);
-        return;
-      }
+    // Si ya está cargado, resolver inmediatamente
+    if (window.grecaptcha && window.grecaptcha.ready) {
+      setIsLoaded(true);
+      return Promise.resolve();
+    }
 
-      setIsLoading(true);
-      setError(null);
+    setIsLoading(true);
+    setError(null);
 
+    // Crear la promesa de carga
+    loadingPromiseRef.current = new Promise((resolve, reject) => {
       // Crear el script
       const script = document.createElement('script');
       script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
@@ -48,6 +41,7 @@ export const useRecaptcha = () => {
             clearInterval(checkReady);
             setIsLoaded(true);
             setIsLoading(false);
+            loadingPromiseRef.current = null;
             resolve();
           }
         }, 100);
@@ -58,6 +52,7 @@ export const useRecaptcha = () => {
           if (!window.grecaptcha || !window.grecaptcha.ready) {
             setIsLoading(false);
             setError('Timeout al cargar reCAPTCHA');
+            loadingPromiseRef.current = null;
             reject(new Error('Timeout al cargar reCAPTCHA'));
           }
         }, 5000);
@@ -66,13 +61,16 @@ export const useRecaptcha = () => {
       script.onerror = () => {
         setIsLoading(false);
         setError('Error al cargar reCAPTCHA');
+        loadingPromiseRef.current = null;
         reject(new Error('Error al cargar reCAPTCHA'));
       };
 
       // Agregar el script al DOM
       document.head.appendChild(script);
     });
-  }, [isLoading]);
+
+    return loadingPromiseRef.current;
+  }, []);
 
   // Función para ejecutar reCAPTCHA
   const executeRecaptcha = useCallback(async (action = 'submit') => {
@@ -98,8 +96,8 @@ export const useRecaptcha = () => {
 
   // Función para precargar reCAPTCHA (opcional)
   const preloadRecaptcha = useCallback(() => {
-    if (!isLoaded && !isLoading) {
-      loadRecaptchaScript().catch(() => {
+    if (!isLoaded && !isLoading && !loadingPromiseRef.current) {
+      loadRecaptchaScript().catch((error) => {
         // Silenciar errores en precarga
       });
     }

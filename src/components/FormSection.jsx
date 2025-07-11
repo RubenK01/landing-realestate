@@ -44,6 +44,11 @@ const FormSection = ({ onHeightChange }) => {
   const zonaInputRef = useRef(null);
   const [clientIp, setClientIp] = useState('');
 
+  // Precargar reCAPTCHA automáticamente cuando se monte el componente
+  useEffect(() => {
+    preloadRecaptcha();
+  }, [preloadRecaptcha]);
+
   // Sanitiza y limita la entrada
   const sanitizeZona = (value) => {
     // Permite letras, números, espacios, tildes y guiones
@@ -114,10 +119,7 @@ const FormSection = ({ onHeightChange }) => {
       [e.target.name]: e.target.value
     });
     
-    // Precargar reCAPTCHA cuando el usuario empiece a llenar el formulario
-    if (!recaptchaLoaded && (e.target.name === 'name' || e.target.name === 'email')) {
-      preloadRecaptcha();
-    }
+    // Eliminamos la precarga manual aquí ya que se hace automáticamente
   };
 
   const handleCheckbox = (e) => {
@@ -127,17 +129,12 @@ const FormSection = ({ onHeightChange }) => {
   // Función para ejecutar reCAPTCHA v3 (actualizada)
   const handleExecuteRecaptcha = async () => {
     try {
-      console.log('Iniciando ejecución de reCAPTCHA...');
-      console.log('Estado de reCAPTCHA:', { isLoaded: recaptchaLoaded, error: recaptchaError });
-      
       const token = await executeRecaptcha('submit');
-      console.log('Token de reCAPTCHA obtenido:', token ? 'sí' : 'no');
       
       setRecaptchaToken(token);
       setRecaptchaErrorState('');
       return token;
     } catch (error) {
-      console.error('Error en handleExecuteRecaptcha:', error);
       setRecaptchaErrorState('Error de verificación de seguridad');
       return null;
     }
@@ -145,29 +142,22 @@ const FormSection = ({ onHeightChange }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Formulario enviado - Iniciando proceso...');
     
     if (!accepted) {
       alert('Debes aceptar recibir comunicaciones comerciales y la política de privacidad.');
       return;
     }
 
-    console.log('Checkbox aceptado - Ejecutando reCAPTCHA...');
-    
     // Ejecutar reCAPTCHA v3 antes de enviar
     try {
       const token = await handleExecuteRecaptcha();
-      console.log('reCAPTCHA ejecutado, token:', token ? 'obtenido' : 'no obtenido');
       
       if (!token) {
-        console.log('No se obtuvo token de reCAPTCHA');
         return; // Ya se muestra el error en handleExecuteRecaptcha
       }
       
       setIsSubmitting(true);
       setRecaptchaErrorState('');
-      
-      console.log('Enviando formulario al servidor...');
       
       // Agregar el token de reCAPTCHA v3 y toda la info necesaria al payload
       const formDataWithRecaptcha = {
@@ -181,8 +171,6 @@ const FormSection = ({ onHeightChange }) => {
         client_user_agent: navigator.userAgent
       };
 
-      console.log('Datos del formulario:', formDataWithRecaptcha);
-
       fetch(`https://api.metodovende.es/prod/submit-form`, {
         method: 'POST',
         headers: {
@@ -191,7 +179,6 @@ const FormSection = ({ onHeightChange }) => {
         body: JSON.stringify(formDataWithRecaptcha)
       })
         .then(response => {
-          console.log('Respuesta del servidor:', response.status, response.ok);
           if (response.ok) {
             // alert('Formulario enviado exitosamente!');
             setFormData({ name: '', email: '', phone: '', operation: '', zone: '' });
@@ -207,12 +194,10 @@ const FormSection = ({ onHeightChange }) => {
           }
         })
         .catch(error => {
-          console.error('Error en fetch:', error);
           setIsSubmitting(false);
           setRecaptchaToken('');
         });
     } catch (error) {
-      console.error('Error en handleSubmit:', error);
       alert('Error de conexión');
       setIsSubmitting(false);
       setRecaptchaToken('');
@@ -349,6 +334,16 @@ const FormSection = ({ onHeightChange }) => {
 
           {/* reCAPTCHA v3 - Invisible */}
           
+          {/* Indicador sutil de carga de reCAPTCHA */}
+          {!recaptchaLoaded && !recaptchaError && (
+            <div className="text-blue-400 text-xs text-center mb-2">
+              <div className="inline-flex items-center space-x-1">
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-400"></div>
+                <span>Preparando verificación de seguridad...</span>
+              </div>
+            </div>
+          )}
+          
           {recaptchaErrorState && (
             <div className="text-red-400 text-xs text-center">
               {recaptchaErrorState}
@@ -357,9 +352,9 @@ const FormSection = ({ onHeightChange }) => {
 
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || (!recaptchaLoaded && !recaptchaError)}
             className={`w-full font-medium py-2 px-4 rounded-md transition duration-200 ease-in-out transform text-xs md:text-sm ${
-              isSubmitting 
+              isSubmitting || (!recaptchaLoaded && !recaptchaError)
                 ? 'bg-gray-600 text-gray-300 cursor-not-allowed' 
                 : 'bg-blue-600 hover:bg-blue-700 text-white hover:scale-105'
             }`}
@@ -368,6 +363,11 @@ const FormSection = ({ onHeightChange }) => {
               <div className="flex items-center justify-center space-x-2">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                 <span>Enviando...</span>
+              </div>
+            ) : !recaptchaLoaded && !recaptchaError ? (
+              <div className="flex items-center justify-center space-x-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span>Preparando...</span>
               </div>
             ) : (
               'Enviar Mensaje'
