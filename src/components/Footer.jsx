@@ -1,7 +1,7 @@
 import React from 'react';
 
 const Footer = () => (
-  <footer className="w-full flex flex-col pr-6 pb-2 mt-8 gap-3 md:pb-4 p-4">
+  <footer className="w-full flex flex-col pr-6 pb-2 gap-3 md:pb-4 p-4">
     <span className="self-end text-xs md:text-sm text-gray-500 opacity-70 flex items-center gap-1">
       Powered by{' '}
       <a

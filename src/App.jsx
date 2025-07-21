@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { Cookies } from 'react-cookie-consent';
 
 // Pages
 import Home from './pages/Home';
 import ThankYouSection from './components/ThankYouSection';
 import MetodoInmobiliarioSection from './components/MetodoInmobiliarioSection';
+import VendeTuInmuebleSection from './components/VendeTuInmuebleSection';
+import VendeTranquiloSection from './components/VendeTranquiloSection';
+import GuiaPropietarioSection from './components/GuiaPropietarioSection';
 import PoliticaCookies from './pages/PoliticaCookies';
 import PoliticaPrivacidad from './pages/PoliticaPrivacidad';
 
@@ -26,6 +29,10 @@ function App() {
   const [cookiesAccepted, setCookiesAccepted] = useState(false);
   // Estado para la altura del formulario
   const [formHeight, setFormHeight] = useState(null);
+  const location = useLocation();
+
+  // Rutas donde el footer no se debe mostrar
+  const noFooterRoutes = ['/vendetuinmueble', '/vendetranquilo', '/guiapropietario'];
 
   useEffect(() => {
     // Leer la cookie de consentimiento
@@ -52,6 +59,9 @@ function App() {
             <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
             <Route path="/thank-you" element={<ThankYouSection />} />
             <Route path="/metodo-inmobiliario" element={<MetodoInmobiliarioSection />} />
+            <Route path="/vendetuinmueble" element={<VendeTuInmuebleSection />} />
+            <Route path="/vendetranquilo" element={<VendeTranquiloSection />} />
+            <Route path="/guiapropietario" element={<GuiaPropietarioSection />} />
           </Routes>
         </div>
         
@@ -60,7 +70,7 @@ function App() {
           onAccept={() => setCookiesAccepted(true)}
           onDecline={() => setCookiesAccepted(false)}
         />
-        <Footer />
+        {!noFooterRoutes.includes(location.pathname) && <Footer />}
       </div>
       
       
