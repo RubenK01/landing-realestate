@@ -70,7 +70,7 @@ function App() {
           onAccept={() => setCookiesAccepted(true)}
           onDecline={() => setCookiesAccepted(false)}
         />
-        {!noFooterRoutes.includes(location.pathname) && <Footer />}
+        {!noFooterRoutes.some(route => location.pathname.startsWith(route)) && <Footer />}
       </div>
       
       
