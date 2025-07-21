@@ -208,7 +208,7 @@ const FormSection = ({ onHeightChange }) => {
     <div className="w-full h-full flex items-center justify-center">
       <div className="rounded-lg p-6 pb-8 w-full max-w-lg" ref={formRef}>
         <h3 className="text-lg md:text-2xl text-white mb-4 text-left leading-tight text-justify">
-          <span className="font-extrabold">Vende</span> o <span className="font-extrabold">Alquila</span> tu propiedad en Madrid rápido, y sin perder valor con un método profesional <span className="font-extrabold">VERIFICADO</span>
+          <span className="font-extrabold">Vende</span> o <span className="font-extrabold">Alquila</span> tu propiedad en Madrid rápido y sin perder valor con un método profesional <span className="font-extrabold">VERIFICADO</span>
         </h3>
         <p className="text-gray-300 mb-3 text-left text-xs md:text-sm leading-tight text-justify">
           Vende o alquila tu propiedad en Madrid en menos de 45 días al mejor precio y con gestión 100% profesional, gracias al <span className="font-semibold text-yellow-400">Método V.E.N.D.E.</span>: visibilidad total, estrategia precisa y control absoluto de todo el proceso.
