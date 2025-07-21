@@ -199,12 +199,9 @@ const CookieBanner = ({ onAccept, onDecline }) => {
               <div className="space-y-3">
                 <button
                   onClick={handleConfirmChoice}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg"
-                  style={{
-                    boxShadow: '0 4px 14px 0 rgba(37, 99, 235, 0.4)'
-                  }}
+                  className="w-full bg-transparent text-gray-400 hover:text-gray-300 font-normal py-2 px-4 rounded-lg border border-gray-600 hover:border-gray-500 transition-all duration-300 ease-in-out"
                 >
-                  ✅ Confirmar mi elección
+                  Confirmar mi elección
                 </button>
                 
                 <button
