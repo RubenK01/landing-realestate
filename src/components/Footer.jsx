@@ -5,12 +5,12 @@ const Footer = () => (
     <span className="self-end text-xs md:text-sm text-gray-500 opacity-70 flex items-center gap-1">
       Powered by{' '}
       <a
-        href="https://www.linkedin.com/in/ruben-casado-00ads1"
+        href="https://rcasado.cloud"
         target="_blank"
         rel="noopener noreferrer"
         className="text-white font-bold no-underline hover:underline hover:text-gray-300 transition-colors"
       >
-        RubenK
+        RubenCasado
       </a>
       <a
         href="https://wa.me/34664656038"
